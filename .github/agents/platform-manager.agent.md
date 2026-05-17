@@ -231,7 +231,7 @@ When {{PARENT_1}} approves a proposal or requests a change, execute it yourself.
 
 ### Multi-Agent Implementation
 
-**Follow the `agent-dispatch` skill (`.github/skills/agent-dispatch/SKILL.md`)** for launch-vs-steer decisions. Default: launch fresh via `task` tool. Only use `write_agent` when continuing an existing conversation with relevant context.
+**Follow the `agent-steering` skill (`.github/skills/agent-steering/SKILL.md`)** for launch-vs-steer decisions. Default: launch fresh via `task` tool. Only use `write_agent` when continuing an existing conversation with relevant context.
 
 For complex changes spanning multiple files or domains, launch sub-agents:
 

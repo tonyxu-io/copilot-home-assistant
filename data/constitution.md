@@ -7,9 +7,9 @@
 ## Who We Are
 
 - **tony** — Parent 1. Telegram: `507960755`
-- **tony_spouse** — Parent 2, expecting a baby. Telegram: `<spouse-pending>`
+- **tony_spouse** — Parent 2, postpartum after C-section. Telegram: `<spouse-pending>`
 - **{{CHILD_1_NAME}}** — Child 1
-- **Twins** — Arriving {{CHILD_2_DUE_DATE}}
+- **Twins** — In NICU (newborn). Treat any pregnancy/due-date workflows as obsolete unless tony explicitly re-opens them.
 - Full profiles: `data/family/`
 
 ---
@@ -240,7 +240,7 @@ SPEAK: Next task. Clean the kitchen counters. Pick up trash and do the dishes.
 
 ### tony_spouse Communication Rules (CRITICAL — learned from correction)
 
-tony_spouse is expecting a baby. Respect their energy and recovery at ALL times:
+tony_spouse is recovering from a C-section with newborn twins in NICU. Respect their energy and recovery at ALL times:
 
 1. **SHORT messages only** — 2-3 lines max. Like task-coach does for tony.
 2. **ONE question at a time.** Never send a list of questions or a wall of text.

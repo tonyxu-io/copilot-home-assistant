@@ -1,10 +1,13 @@
 ---
 name: content-issue-lifecycle
 description: >
-  Standardized procedure for managing GitHub Issues in your content pipeline repository as content moves
-  through the pipeline. Use when agent says "update issue", "close issue", "schedule post",
-  "publish content", "reschedule post", "content published", "issue lifecycle", "content pipeline sync",
-  or any content state transition that should be reflected in GitHub Issues.
+  Standardized procedure for managing GitHub Issues in your content pipeline repository as content
+  moves through the pipeline, AND the reconciliation workflow that syncs Issues to actual Late/Zernio
+  post status. Use when agent says "update issue", "close issue", "schedule post", "publish content",
+  "reschedule post", "content published", "issue lifecycle", "content pipeline sync", "reconcile
+  issues", "sync posts to issues", "issue reconciliation", "match posts to issues",
+  "pipeline sync", "update issue status from posts", or any content state transition that should be
+  reflected in GitHub Issues.
 ---
 
 # Content Issue Lifecycle Skill
@@ -150,3 +153,60 @@ The content-management repo is the **single source of truth** for what's been cr
 - `content-editor` — After publishing video-derived content
 - `content-scheduler` — After rescheduling or queue reordering
 - `content-manager` — Pipeline health monitoring (reads, doesn't write)
+
+---
+
+## Reconciliation (Sync Posts → Issues)
+
+*Merged from the former `content-reconciliation` skill on 2026-05-17. Use this section when you need to retroactively sync GitHub Issues to actual Late/Zernio post status (Mon + Thu morning reconciliation cron, or manual trigger).*
+
+Keeps GitHub Issues in `{{CONTENT_REPO}}` in sync with actual Zernio/Late post status. Runs as a scheduled cron job (Mon + Thu mornings) and can be triggered manually.
+
+## Reconciliation Workflow
+
+1. **Pull posts** — Paginate through `late_list_posts` for both `scheduled` and `published` statuses (at least 300-500 of each for good coverage).
+2. **Pull open issues** — List all open issues from `{{CONTENT_REPO}}`.
+3. **Match posts to issues** — Use fuzzy matching on:
+   - Issue title vs post content/title (multi-word phrase overlap)
+   - Topic-specific keyword matching (e.g., "mythos", "openshell", "copilot cli")
+   - Issue number tags in posts (e.g., `issue-197`)
+   - A match score threshold of **≥5** to avoid false positives.
+4. **Update matched issues:**
+   - **Comment** — Leave a structured comment with post IDs, platforms, dates, and status table.
+   - **Label** — Set the correct status label:
+     - `status:published` if any posts are published
+     - `status:scheduled` if posts exist but none published yet
+   - Remove stale status labels (`status:draft`, `status:ready`, `status:recorded`) when upgrading.
+   - **Close** — Close the issue if it has 3+ published posts and zero remaining scheduled posts (fully rolled out).
+5. **Report** — Send a summary notification to the operator with match stats, label changes, and closed issues.
+6. **Track orphans** — Note issues with no matching posts (still need recording) and unmatched posts (generic/lifestyle content).
+
+## Skip Logic
+
+- Don't re-comment on issues that already have a recent reconciliation comment (within 3 days).
+- Don't downgrade labels (e.g., don't change `status:published` back to `status:scheduled`).
+- Issues with `status:article-published` are blog-only — skip video reconciliation for these.
+
+## Comment Template
+
+```markdown
+## 🤖 Automated Pipeline Reconciliation
+
+**Total posts found:** X (Y published, Z scheduled)
+
+**Published on:** platform1, platform2
+**Scheduled on:** platform3
+
+### Post Details
+| Platform | Status | Date | Post ID |
+|----------|--------|------|---------|
+| youtube | published | 2026-04-14 | `abc123...` |
+
+**Status updated to:** `status:published`
+```
+
+## Integration Notes
+
+- Uses the `content-pillar-schema` skill for label definitions and lifecycle transitions.
+- Uses the `late-publishing` skill for platform account IDs when querying posts.
+- Notify the operator using your preferred messaging channel. Never hardcode chat IDs in this skill.
