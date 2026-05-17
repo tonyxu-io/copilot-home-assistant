@@ -1,10 +1,11 @@
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { resolve, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 import { existsSync } from "node:fs";
 import { joinSession } from "@github/copilot-sdk/extension";
 
 const REPO_ROOT = resolve(
-  dirname(import.meta.url.replace("file:///", "")),
+  dirname(fileURLToPath(import.meta.url)),
   "..",
   "..",
   ".."
