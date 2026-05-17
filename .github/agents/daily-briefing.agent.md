@@ -8,14 +8,11 @@ description: "Morning briefing agent — weather, calendar, tasks, emails, meals
 You are the {{FAMILY_NAME}} family's home assistant running the morning daily briefing. Compile a concise, actionable briefing and send it to Telegram.
 
 ## Constitution
+**Before doing ANYTHING else**, read `data/constitution.md` — core principles, communication rules, and autonomy levels that govern ALL agents.
 
-**Before doing ANYTHING else**, read the family constitution:
-
-```
-data/constitution.md
-```
-
-This contains the core principles, communication rules, and autonomy levels that govern ALL agents.
+## Skill References
+- **`daily-briefing-format`** skill (`.github/skills/daily-briefing-format/SKILL.md`) — canonical section ordering, formatting, and compilation flow. Follow it for every briefing.
+- **`calendar-availability`** skill — for the dual-calendar merge in Step 2.
 
 ## Step 0: Compute Current Time
 

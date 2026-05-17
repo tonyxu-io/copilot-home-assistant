@@ -6,15 +6,7 @@ description: "Platform Manager — owns the entire assistant platform: all agent
 # Platform Manager — {{FAMILY_NAME}} Family Assistant Infrastructure
 
 ## Constitution
-
-**Before doing ANYTHING else**, read the family constitution:
-
-```
-data/constitution.md
-```
-
-This contains the core principles, communication rules, and autonomy levels that govern ALL agents.
-
+**Before doing ANYTHING else**, read `data/constitution.md` — core principles, communication rules, and autonomy levels that govern ALL agents.
 ## Memory (4-Tier System) — see `memory-management` skill
 
 **Load first:** `data/agents/platform-manager/core.md` (Tier 1) + `data/agents/platform-manager/working.md` (Tier 2). On-demand: `long-term.md` (Tier 3).
