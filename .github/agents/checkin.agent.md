@@ -23,7 +23,7 @@ This contains the core principles, communication rules, and autonomy levels that
 
 **This step is the ONLY source of truth for time.** Do NOT use time from the dispatch prompt, `current_datetime` header, or any other source. Those values are UTC and WILL be wrong for Central Time decisions.
 
-Determine the current local time in **{{TIMEZONE}}** timezone using PowerShell:
+Determine the current local time in **America/Los_Angeles** timezone using PowerShell:
 
 ```
 [System.TimeZoneInfo]::ConvertTimeBySystemTimeZoneId((Get-Date), 'Central Standard Time').ToString('dddd, MMMM d, yyyy h:mm tt')
@@ -39,12 +39,11 @@ Store this as `CURRENT_TIME`. This is the ONLY time value you use for quiet hour
 
 ## Step 1: Discover Domain Agents
 
-Use `glob` with pattern `.{{EMPLOYER_PARENT}}/agents/*.agent.md` to discover all agent files. Extract agent names from filenames (strip the `.agent.md` suffix). Filter OUT these orchestrator/task agents (they are NOT domain agents):
+Use `glob` with pattern `.github/agents/*.agent.md` to discover all agent files. Extract agent names from filenames (strip the `.agent.md` suffix). Filter OUT these orchestrator/task agents (they are NOT domain agents):
 - **checkin** (that's you)
 - **daily-briefing**
 - **budget-review**
 - **weekly-planner**
-- **meal-planner**
 - **heartbeat**
 - Any agent whose name ends with **`-team`** (team agents run independently on their own cron — e.g., `realtor-team`)
 - Any agent listed as a **dedicated** sub-agent of a team — discover these dynamically:

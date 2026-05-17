@@ -150,7 +150,7 @@ Each platform gets tailored content:
 
 - **Stagger posts** — Don't publish to all platforms simultaneously. Space 30-60 min apart.
 - **Best times** — Use `zernio analytics:best-time --accountId <id>` to discover optimal posting times per platform
-- **Timezone** — Always use `--timezone "{{TIMEZONE}}"` for Central Time
+- **Timezone** — Always use `--timezone "America/Los_Angeles"` for Central Time
 - **Video posts** — Upload media first with `zernio media:upload`, then reference the URL in `--media`
 - **Hashtags** — Use `--hashtags` for discoverability. TikTok loves them, LinkedIn does not.
 - **Tags** — Use `--tags` for internal tracking (e.g., `vidpipe,short,idea-42`)
@@ -249,7 +249,7 @@ The **`content-creative`** agent generates AI-powered social media posts (text +
 - `zernio accounts:list` — List all connected accounts with IDs
 - `zernio accounts:health` — Check token health, rate limits, and posting ability
 - `zernio media:upload <file>` — Upload video/image, returns URL for posting
-- `zernio posts:create --text "..." --accounts <ids> [--scheduledAt "ISO8601"] [--timezone "{{TIMEZONE}}"] [--media "url"] [--title "..."] [--hashtags "..."] [--tags "..."]` — Create or schedule a post
+- `zernio posts:create --text "..." --accounts <ids> [--scheduledAt "ISO8601"] [--timezone "America/Los_Angeles"] [--media "url"] [--title "..."] [--hashtags "..."] [--tags "..."]` — Create or schedule a post
 - `zernio posts:list --status <status>` — List posts (scheduled, published, failed, draft)
 - `zernio posts:get <id>` — Get post details and publish status
 - `zernio posts:retry <id>` — Retry a failed post

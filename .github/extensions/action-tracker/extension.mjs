@@ -1094,8 +1094,8 @@ function cancelTemplateInstance(args) {
 
 function checkScheduledTriggers() {
   const templates = loadTemplates();
-  // Use {{TIMEZONE}} timezone to match cron.json
-  const nowStr = new Date().toLocaleString("en-US", { timeZone: "{{TIMEZONE}}" });
+  // Use America/Los_Angeles timezone to match cron.json
+  const nowStr = new Date().toLocaleString("en-US", { timeZone: "America/Los_Angeles" });
   const now = new Date(nowStr);
   const due = [];
 

@@ -151,7 +151,7 @@ late_create_post(
   platforms: [{"platform": "youtube", "accountId": "{{YOUTUBE_ACCOUNT_ID}}"}, ...],
   media_items: [{"type": "video", "url": "[publicUrl]"}],
   queue_id: "{{LATE_PROFILE_ID}}",
-  timezone: "{{TIMEZONE}}"
+  timezone: "America/Los_Angeles"
 )
 ```
 

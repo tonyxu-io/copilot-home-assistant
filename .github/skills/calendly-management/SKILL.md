@@ -90,7 +90,7 @@ Representative response pattern:
     "slug": "{{GITHUB_USERNAME}}",
     "email": "{{EMAIL}}",
     "scheduling_url": "https://calendly.com/{{GITHUB_USERNAME}}",
-    "timezone": "{{TIMEZONE}}",
+    "timezone": "America/Los_Angeles",
     "organization": "https://api.calendly.com/organizations/ORG_UUID"
   }
 }

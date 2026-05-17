@@ -288,7 +288,7 @@ Execute all fixes identified in Phase 1C (near-term, max 6) and Phase 2C (deep s
    - Move post B → post A's old datetime
 3. Verify each reschedule succeeded before moving to the next.
 4. If a reschedule fails (API error), log it and skip to the next fix. Don't retry in the same cycle — pick it up next cycle.
-5. **Timezone:** Always use `{{TIMEZONE}}` when rescheduling.
+5. **Timezone:** Always use `America/Los_Angeles` when rescheduling.
 
 ---
 
@@ -359,7 +359,7 @@ Zernio doesn't support direct queue reordering. The ONLY approved method is **up
 The primary tool. Call it with:
 - `post_id` — the post to move
 - `scheduled_for` — the new ISO 8601 datetime
-- `timezone` — always `"{{TIMEZONE}}"`
+- `timezone` — always `"America/Los_Angeles"`
 
 ### Fallback: Direct API PATCH
 

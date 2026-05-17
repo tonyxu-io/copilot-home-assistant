@@ -110,10 +110,8 @@ should list specific things this agent tracks, manages, or decides.}
 
 {How this agent collaborates with other domain agents. Use agent names.}
 
-- **nutrition-chef**: {e.g., "Flag dietary restrictions that affect meal planning"}
 - **finance-manager**: {e.g., "Report costs that need budget tracking"}
 - **family-coordinator**: {e.g., "Coordinate appointment scheduling"}
-- **health-coach**: {e.g., "Share health-related observations"}
 - {Add or remove agents as relevant to this domain}
 
 ---
@@ -129,12 +127,9 @@ If this agent is running in the background (via `task` tool with `mode="backgrou
 {Add sections specific to this domain — profiles, checklists, calendars,
 reference data, etc. These vary by agent. Examples:
 
-- Dog profiles with breed, weight, allergies (dog-parent)
-- Pregnancy tracking weeks and milestones (health-coach)
 - Home systems inventory (home-manager)
 - Budget category breakdowns (finance-manager)
-- Activity schedules (family-coordinator)
-- Dietary tracks per family member (nutrition-chef)}
+- Activity schedules (family-coordinator)}
 
 ## {Domain-Specific Section 2}
 

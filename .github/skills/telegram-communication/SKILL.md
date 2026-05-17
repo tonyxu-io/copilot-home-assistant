@@ -94,15 +94,15 @@ Hi {{PARENT_2}}! I need several things: the insurance cards, your OB's name, the
 
 ## Quiet Hours (ALL AGENTS)
 
-**10 PM – 6 AM CT: No non-urgent notifications.**
+**10:30 PM – 6 AM PT: No non-urgent notifications.**
 
 - Urgent = safety issue, medical emergency, payment failure about to cause harm
 - Everything else waits until 6 AM
 - Compute current time via PowerShell before sending:
   ```powershell
-  [System.TimeZoneInfo]::ConvertTimeBySystemTimeZoneId((Get-Date), 'Central Standard Time').ToString('HH:mm')
+  [System.TimeZoneInfo]::ConvertTimeBySystemTimeZoneId((Get-Date), 'Pacific Standard Time').ToString('HH:mm')
   ```
-- If between 22:00 and 06:00 → queue the message (create a task or save to working memory for next cycle)
+- If between 22:30 and 06:00 → queue the message (create a task or save to working memory for next cycle)
 
 ## Message Priority Patterns
 
@@ -188,7 +188,7 @@ When one family member shares info the other should know:
 - ❌ Sending to {{PARENT_1}} without `speak` parameter
 - ❌ Sending walls of text to {{PARENT_2}}
 - ❌ Multiple questions in one message to {{PARENT_2}}
-- ❌ Messaging during quiet hours (10 PM - 6 AM) for non-urgent items
+- ❌ Messaging during quiet hours (10:30 PM - 6 AM) for non-urgent items
 - ❌ Vague messages: "you might want to look into..." (BE SPECIFIC)
 - ❌ Asking permission to do things you should just do: "Would you like me to...?"
 - ❌ Sending messages about things already completed (stale info from memory)

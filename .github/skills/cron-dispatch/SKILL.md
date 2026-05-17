@@ -69,7 +69,7 @@ Cron fires → main session receives dispatch message →
 
 ```json
 {
-  "timezone": "{{TIMEZONE}}",
+  "timezone": "America/Los_Angeles",
   "jobs": [
     {
       "id": "job-name",

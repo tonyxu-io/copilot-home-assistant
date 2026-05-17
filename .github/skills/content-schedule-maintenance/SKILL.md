@@ -193,7 +193,7 @@ When the operator requests "prioritize [topic]":
 
 ### Primary
 - `late_list_posts` — Fetch scheduled posts (pagination only — date filters broken, return 500)
-- `late_reschedule_post` — Move a post to a new datetime (always use `timezone: "{{TIMEZONE}}"`)
+- `late_reschedule_post` — Move a post to a new datetime (always use `timezone: "America/Los_Angeles"`)
 - `late_get_post` — Full post details
 
 ### Known API Quirks

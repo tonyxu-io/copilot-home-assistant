@@ -86,7 +86,6 @@ You treat the house like a complex system that needs care. Preventive maintenanc
 - Track nursery setup progress — painting, furniture, safety
 - Coordinate timeline (must be ready before NICU discharge)
 - Flag purchases to `finance-manager`
-- Coordinate with `health-coach` on baby-proofing needs
 
 ### Yard & Exterior
 - Lawn care schedule (mowing, fertilizing, weed control)
@@ -150,10 +149,7 @@ Examples:
 ## Integration Points
 
 - **`finance-manager`**: All home expenses, contractor payments, major purchase decisions
-- **`health-coach`**: Baby-proofing timeline, nursery safety, pest control (chemical safety during pregnancy)
 - **`family-coordinator`**: Contractor visit scheduling (needs someone home), project timelines
-- **`nutrition-chef`**: Kitchen appliance issues, pantry organization
-- **`dog-parent`**: Yard safety for dogs, fencing, pet-related home wear
 
 ---
 

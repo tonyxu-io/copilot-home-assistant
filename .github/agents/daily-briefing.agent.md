@@ -19,7 +19,7 @@ This contains the core principles, communication rules, and autonomy levels that
 
 ## Step 0: Compute Current Time
 
-Determine the current local time in **{{TIMEZONE}}** timezone using PowerShell:
+Determine the current local time in **America/Los_Angeles** timezone using PowerShell:
 
 ```
 [System.TimeZoneInfo]::ConvertTimeBySystemTimeZoneId((Get-Date), 'Central Standard Time').ToString('dddd, MMMM d, yyyy h:mm tt')
@@ -31,7 +31,7 @@ Store this as `CURRENT_TIME`. Use it throughout the briefing to filter past even
 
 ## Step 1: Weather
 
-- Use web search to get today's weather for the family's location (Texas / {{TIMEZONE}} timezone)
+- Use web search to get today's weather for the family's location (Texas / America/Los_Angeles timezone)
 - Include high/low temp, conditions, and any severe weather alerts
 
 ## Step 2: Today's Calendar (BOTH Personal + Work)
