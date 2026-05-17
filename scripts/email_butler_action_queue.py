@@ -87,12 +87,45 @@ def retry_call(fn: Callable[[], Any], attempts: int = 3, base_delay: float = 1.5
     raise last_exc
 
 
+def _cmd_label(cmd: list[str]) -> str:
+    """Short forensic label for a subprocess call.
+
+    Captures the binary basename plus the first few args so a hang can be
+    pinpointed to a specific gws/copilot invocation in stderr — without
+    leaking message IDs, query strings, or token-bearing flags.
+    """
+    if not cmd:
+        return "?"
+    base = os.path.basename(cmd[0]) or cmd[0]
+    safe_args: list[str] = []
+    for a in cmd[1:6]:
+        if not isinstance(a, str):
+            continue
+        if a.startswith("--params") or len(a) > 40 or "{" in a or "=" in a and len(a) > 30:
+            safe_args.append("<arg>")
+        else:
+            safe_args.append(a)
+    return f"{base} {' '.join(safe_args)}".strip()
+
+
 def run_cmd(cmd: list[str], timeout: int = GWS_TIMEOUT_S) -> str:
     env = os.environ.copy()
     env["PATH"] = "/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:" + env.get("PATH", "")
-    proc = subprocess.run(cmd, text=True, capture_output=True, timeout=timeout, env=env)
+    label = _cmd_label(cmd)
+    started = time.time()
+    log(f"exec> {label} (timeout={timeout}s)")
+    try:
+        proc = subprocess.run(cmd, text=True, capture_output=True, timeout=timeout, env=env)
+    except subprocess.TimeoutExpired:
+        # Forensic breadcrumb: the offending subprocess hit its hard timeout.
+        # The wrapper still gets to see WHICH call hung, which is exactly the
+        # information PR #7 was missing when only loop-boundary logs existed.
+        log(f"exec! {label} TIMEOUT after {time.time()-started:.1f}s")
+        raise
+    dur = time.time() - started
     out = proc.stdout or ""
     err = proc.stderr or ""
+    log(f"exec< {label} rc={proc.returncode} dur={dur:.1f}s bytes_out={len(out)}")
     if proc.returncode != 0:
         raise RuntimeError(redact(f"command failed ({proc.returncode}): {' '.join(cmd)}\n{out}\n{err}")[:2000])
     return out
