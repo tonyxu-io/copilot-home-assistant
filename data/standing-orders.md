@@ -425,7 +425,9 @@ Keep it concise — use HTML formatting for Telegram.
 
 ## Scheduled Job Operating Rules (CANONICAL — applies to every entry in `cron.json`)
 
-**Delivery rule (every cron job, no exceptions):** Scheduled assistant output is NOT auto-forwarded. If there is useful output, send it to Telegram chat `507960755` via `telegram_send_message`. If there is no material update or only healthy/no-news status, return exactly `[SILENT]` and do not send Telegram. Individual prompts in `cron.json` do not need to repeat this preamble — this rule covers all of them.
+**Delivery rule (every cron job, no exceptions):** Scheduled assistant output is NOT auto-forwarded. If there is useful output, send it to Telegram chat `507960755` via `telegram_send_message`. If there is no material update or only healthy/no-news status, return exactly `[SILENT]` and do not send Telegram.
+
+> ⚠️ **Implementation reality:** `cron-scheduler` reads `.github/agents/{name}.agent.md` and `job.prompt` from `cron.json`, but does NOT auto-inject this file. So this rule reaches cron-launched agents ONLY when (a) the agent file or its referenced skills include it, or (b) each `cron.json` prompt repeats a short preamble. The repo currently keeps a one-line `Delivery rule:` preamble at the top of every `cron.json` prompt as the reliable backstop — this canonical entry exists to keep that preamble consistent. Do NOT remove the per-prompt preambles unless the cron extension is changed to inject this file.
 
 **Tone baseline:** direct, concise, mobile-first; Chinese when the workflow asks for Chinese.
 
