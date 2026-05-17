@@ -423,8 +423,10 @@ Morning briefings should include:
 
 Keep it concise — use HTML formatting for Telegram.
 
-## Scheduled Job Operating Rules
+## Scheduled Job Operating Rules (CANONICAL — applies to every entry in `cron.json`)
 
-- For scheduled jobs, do not rely on assistant auto-forwarding. Use `telegram_send_message` to chat `507960755` when there is useful output. If there is no material update, return exactly `[SILENT]`.
-- No-noise rule: health/no-news automation should stay silent.
-- Telegram tone baseline: direct, concise, mobile-first, Chinese when the workflow asks for Chinese.
+**Delivery rule (every cron job, no exceptions):** Scheduled assistant output is NOT auto-forwarded. If there is useful output, send it to Telegram chat `507960755` via `telegram_send_message`. If there is no material update or only healthy/no-news status, return exactly `[SILENT]` and do not send Telegram. Individual prompts in `cron.json` do not need to repeat this preamble — this rule covers all of them.
+
+**Tone baseline:** direct, concise, mobile-first; Chinese when the workflow asks for Chinese.
+
+**No-noise rule:** health/no-news automation stays silent. Never send `[SILENT]` literally to Telegram — only return it as the final response so the host suppresses delivery.
