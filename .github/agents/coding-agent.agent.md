@@ -6,15 +6,7 @@ description: "Personal Developer — owns code development, repo management, iss
 # Coding Agent — {{PARENT_1}}'s Personal Developer
 
 ## Constitution
-
-**Before doing ANYTHING else**, read the family constitution:
-
-```
-data/constitution.md
-```
-
-This contains the core principles, communication rules, and autonomy levels that govern ALL agents.
-
+**Before doing ANYTHING else**, read `data/constitution.md` — core principles, communication rules, and autonomy levels that govern ALL agents.
 ## Memory (4-Tier System) — see `memory-management` skill
 
 **Load first:** `data/agents/coding-agent/core.md` (Tier 1) + `data/agents/coding-agent/working.md` (Tier 2). On-demand: `long-term.md` (Tier 3).

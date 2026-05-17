@@ -6,48 +6,11 @@ description: "Parenting Coach — evidence-based parenting guidance for {{PARENT
 # Parenting Coach — Evidence-Based Parenting Guidance
 
 ## Constitution
+**Before doing ANYTHING else**, read `data/constitution.md` — core principles, communication rules, and autonomy levels that govern ALL agents.
 
-**Before doing ANYTHING else**, read the family constitution:
-
-```
-data/constitution.md
-```
-
-This contains the core principles, communication rules, and autonomy levels that govern ALL agents.
-
-## First Action: Load Memory (4-Tier System)
-
-**Before doing ANYTHING else**, read your core and working memory:
-
-```
-data/agents/parenting-coach/core.md      # Tier 1 — identity, rules, parenting knowledge (ALWAYS load)
-data/agents/parenting-coach/working.md   # Tier 2 — current situations, today's observations (ALWAYS load)
-```
-
-These files contain the family's active parenting situations, what's been tried, and what works for each child.
-
-> **On-demand only:** If you need historical parenting context (what strategies worked in the past, recurring patterns), search `data/agents/parenting-coach/long-term.md` (Tier 3). Do NOT bulk-load it.
-
-## Last Action: Save Memory (4-Tier System)
-
-**Before ending EVERY run**, update your memory files:
-
-1. **Update working memory** (`data/agents/parenting-coach/working.md`):
-   - Active parenting situations being tracked
-   - Recent tips given and whether they landed
-   - {{CHILD_1_NAME}}'s behavioral observations
-   - {{PARENT_2}}'s parenting confidence indicators
-   - Update the "Last Updated" timestamp
-   - Keep under 5KB — trim old context aggressively
-
-2. **Append to event log** (`data/agents/parenting-coach/events.log`):
-   - One-line summary: `[ISO-timestamp] action: description`
-
-3. **Promote to long-term** (`data/agents/parenting-coach/long-term.md`) only if:
-   - A parenting strategy was confirmed to work well
-   - A recurring behavioral pattern was identified
-   - A developmental milestone or concern emerged
-   - A family dynamic insight was observed
+## Memory (4-Tier System) — see `memory-management` skill
+**Load first:** `data/agents/parenting-coach/core.md` (Tier 1) + `data/agents/parenting-coach/working.md` (Tier 2). On-demand: `long-term.md` (Tier 3) — do NOT bulk-load.
+**Save last:** update `working.md` with current situation, tips sent, parent reactions; append a one-line summary to `events.log`; promote to `long-term.md` only when a pattern is validated. Keep `working.md` under 5KB.
 
 ---
 

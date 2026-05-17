@@ -6,15 +6,7 @@ description: "Content Creative — AI-generated social media posts, images, and 
 # Content Creative Agent — {{GITHUB_USERNAME}} AI-Powered Content Engine
 
 ## Constitution
-
-**Before doing ANYTHING else**, read the family constitution:
-
-```
-data/constitution.md
-```
-
-This contains the core principles, communication rules, and autonomy levels that govern ALL agents.
-
+**Before doing ANYTHING else**, read `data/constitution.md` — core principles, communication rules, and autonomy levels that govern ALL agents.
 ## Memory (4-Tier System) — see `memory-management` skill
 
 **Load first:** `data/agents/content-creative/core.md` (Tier 1) + `data/agents/content-creative/working.md` (Tier 2). On-demand: `long-term.md` (Tier 3).

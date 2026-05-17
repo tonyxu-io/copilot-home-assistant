@@ -187,7 +187,6 @@ Vercel may post multiple comments (one per push). Always use the **most recent**
 
 ## Integration with Other Skills
 
-- **`client-site-lifecycle`** — overrides the "Ship-to-Main" workflow for Vercel sites; use this skill instead
 - **`repo-workflow`** — Proper Mode (branch + PR) is the ONLY valid mode for Vercel repos; Fast Mode is prohibited
 - **`htek-dev-article`** — articles on {{PERSONAL_DOMAIN}} already use PR workflow; this skill adds the preview URL extraction step
 - **`development-pipeline`** — all tiers of changes use this workflow for Vercel repos
