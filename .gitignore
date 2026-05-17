@@ -9,3 +9,10 @@ data/shopping-lists/shopping.db
 *.db-shm
 .playwright-mcp/
 recording-aids/
+
+# Python bytecode
+__pycache__/
+*.pyc
+
+# Accidental host-path nesting (path bug in some extension wrote here)
+/home/

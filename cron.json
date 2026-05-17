@@ -1,373 +1,96 @@
 {
-  "timezone": "{{TIMEZONE}}",
+  "timezone": "America/Los_Angeles",
   "jobs": [
     {
-      "id": "morning-briefing",
-      "schedule": "0 6 * * 1-5",
-      "enabled": true,
-      "agent": "daily-briefing"
-    },
-    {
-      "id": "weekend-briefing",
-      "schedule": "0 8 * * 0,6",
-      "enabled": true,
-      "agent": "daily-briefing"
-    },
-    {
-      "id": "heartbeat",
-      "schedule": "0 7,9,11,13,15,17,19,21 * * *",
-      "enabled": true,
-      "agent": "checkin"
-    },
-    {
-      "id": "weekly-planner",
-      "schedule": "0 19 * * 0",
-      "enabled": true,
-      "agent": "weekly-planner"
-    },
-    {
-      "id": "meal-planner",
-      "schedule": "0 10 * * 6",
-      "enabled": true,
-      "agent": "meal-planner"
-    },
-    {
-      "id": "budget-review",
-      "schedule": "0 9 1 * *",
-      "enabled": true,
-      "agent": "budget-review"
-    },
-    {
-      "id": "nightly-reflection",
-      "schedule": "0 21 * * *",
-      "enabled": true,
-      "agent": "platform-manager"
-    },
-    {
-      "id": "content-trend-scan",
-      "schedule": "0 6 * * 1-5",
-      "enabled": true,
-      "agent": "content-manager",
-      "prompt": "Run your morning trend scan. Focus on AI, developer tools, and Copilot ecosystem. Check YouTube trending in tech and search for new blog-worthy topics."
-    },
-    {
-      "id": "content-sunday-review",
-      "schedule": "0 18 * * 0",
-      "enabled": true,
-      "agent": "content-manager",
-      "prompt": "Run your weekly content review. Summarize what published this week, engagement metrics, what's queued for next week, and any gaps in the content calendar."
-    },
-    {
-      "id": "content-friday-report",
-      "schedule": "0 17 * * 5",
-      "enabled": true,
-      "agent": "content-manager",
-      "prompt": "Generate the Friday content performance report. Include views, engagement, and top-performing posts from this week. Send summary to {{PARENT_1}} via Telegram."
-    },
-    {
-      "id": "content-issue-reconcile",
-      "schedule": "0 8 * * 1,4",
-      "enabled": true,
-      "agent": "content-manager",
-      "prompt": "Run issue reconciliation. Pull all published and scheduled posts from Late/Zernio (paginate through at least 500 of each). Pull all open issues from {{GITHUB_USERNAME}}/content-management. Fuzzy-match posts to issues by title/content overlap. For each match: leave a reconciliation comment with post IDs and dates, update the status label (status:published or status:scheduled), remove stale labels. Close fully-published issues (3+ published, 0 scheduled). Report results to {{PARENT_1}} via Telegram: posts matched, issues updated, issues closed, orphans."
-    },
-    {
-      "id": "task-coach-nudge",
-      "schedule": "20 7,9,11,13,15,17,19 * * *",
-      "enabled": true,
-      "agent": "task-coach"
-    },
-    {
-      "id": "task-coach-ask-paula",
+      "id": "adu-permit-status-check",
       "schedule": "0 10 * * *",
       "enabled": true,
-      "agent": "task-coach",
-      "prompt": "Run the Ask {{PARENT_2}} flow. Send {{PARENT_2}} ONE short message asking if there's anything {{PARENT_1}} should handle today. Parse her response into tasks if she replies. Do NOT follow up if no response. This is the daily {{PARENT_2}} task-source check."
+      "agent": "adu-permit-checker",
+      "prompt": "\nDelivery rule: scheduled assistant output is not auto-forwarded. If there is useful output, send it to Telegram chat `507960755` with `telegram_send_message`. If there is no material update or only healthy/no-news status, return exactly `[SILENT]` and do not send Telegram.\n\nCheck Tony's ADU permit status for the project at 122 Walnut St, Menlo Park, CA 94025.\n\nBehavior:\n- This is a quiet change detector. If there is no material change, respond exactly `[SILENT]`.\n- Material changes: overall status changed, new Resubmittal Received event, a review newly active/completed, new reviewer comment, changed condition/notice, or a new document/comment after the last known corrections decision.\n- Current known baseline: overall `Pending Resubmittal`; Review Decision completed `04/22/2026 by GDO, as Corrections`; PW Engineering / Flood completed `04/22/2026 by EMH, as Corrections`; Building Review completed `04/15/2026 by 3WC, as Corrections`; Detailed Planning completed `04/22/2026 by crt, as Corrections`; next expected change is a new resubmittal that flips status back to `In Review`.\n\nIf there is a material change, write a concise Chinese Telegram update:\n- First line: `**ADU Permit Update** — <main status/change>`\n- 2-4 short bullets max.\n- Include the Accela record number `BLD2025-01110` and any changed date/comment.\n- Use Markdown links with descriptive text if including URLs.\n\nDo not send Telegram yourself; final response is auto-delivered."
     },
     {
-      "id": "email-triage",
-      "schedule": "0 11,15 * * *",
+      "id": "morning-briefing",
+      "schedule": "30 9 * * *",
+      "enabled": true,
+      "agent": "daily-briefing",
+      "prompt": "\nDelivery rule: scheduled assistant output is not auto-forwarded. If there is useful output, send it to Telegram chat `507960755` with `telegram_send_message`. If there is no material update or only healthy/no-news status, return exactly `[SILENT]` and do not send Telegram.\n\nPrepare Tony's morning briefing in Chinese. Deliver it as a single Telegram message.\n\n## Mandatory data collection\n\n- Calendar: check today's agenda.\n- News: collect 2-4 major international headlines.\n- **Tech / Hacker News: mandatory.** Fetch Hacker News front page via Algolia:\n  `https://hn.algolia.com/api/v1/search?tags=front_page&hitsPerPage=60`\n  Then rank all 60 items by Tony's interests: AI/ML, Apple, GitHub/open-source, dev tools, coding, design, infrastructure. Points are only a tiebreaker. Select 3-5 high-signal items. Do not invent items. If the API fails, put one short failure line in Tech.\n- X: **must use Agent Reach Twitter/X cookie channel**, not `xurl` or official X API. Verify/read with:\n  `twitter status --json`\n  `twitter feed -t following -n 50 --json`\n  If Following has fewer than 2 strong posts, optionally fetch:\n  `twitter feed -t for-you -n 50 --json`\n  Keep 2-4 high-signal posts only; if nothing useful, write `无`. Prefer Following over For You; filter out ads, 擦边, political ragebait, traffic alerts, and low-quality repost chains.\n\n## Output contract\n\nTitle line, then sections in this exact order (today-focused):\n\n1. 📅 `**Daily Brief — YYYY-MM-DD (周X) · 早报**` — bold title line, one line only\n2. ⚡ **Priorities** — top 3 things that matter today, ranked. Each bullet MUST start with an action verb + timebox (e.g., `上午`, `午前`, `今日内`). One line per item.\n3. 🧭 **What's next** — proactive plan for Tony: 3-5 concrete next moves across today / this week / can-delegate. Use short bullets like `今天：...`, `本周：...`, `可委托：...`. Connect calendar, signals, current projects, LinkedIn/X posting opportunities, reimbursements, and deadlines when useful. Include a concrete LinkedIn or X writing suggestion when there is a credible prompt, e.g. `LinkedIn：<hook>` or `X：<one-line take>`. Do not write generic personal-brand advice or duplicate Priorities verbatim.\n4. 📆 **Today** — calendar agenda as `HH:MM — event` bullets; flag conflicts or gaps with ⚠️. Call out deep-work windows.\n5. 🧾 **Tasks** — ☑️ must-do today / ▫️ later. Do NOT repeat Priorities verbatim.\n6. 📰 **News** — 2-4 major international / macro / non-work headlines. One line each: `headline — takeaway`. Chinese-first phrasing, English only for proper nouns.\n7. 💻 **Tech** — Hacker News sourced items, 3-5 bullets, each as `• [Chinese headline](url) · {points}分 — one-line takeaway`. This section is required even if News already contains tech-adjacent macro items.\n8. 🐦 **X** — 2-4 high-signal posts as `[@handle](link): one-line point`, or `无`.\n9. 💡 **Note** — one insight or nudge for the day.\n\n**NO email section.** Email is now a separate independent briefing.\n\n## Deduplication rule\n\nEach piece of information appears in ONE section only. If an item is in Priorities, it should NOT repeat in Tasks with the same detail — reference it briefly or omit. News is for world/macro; Tech is for HN items. If the same item appears in both feeds, keep it in Tech unless it is a major macro/geopolitical headline.\n\n## Formatting rules\n\n- Separate major sections with a blank line. No `---` dividers.\n- Section headers use the emoji + `**bold**` label pattern shown above.\n- Keep bullets to one idea each; no paragraphs, no tables.\n- `**bold**` only for the single most important fact per bullet.\n- Dates / amounts / IDs / names in `inline code` when it aids scanning.\n- URLs as `[descriptive text](url)` — no naked URLs.\n- Chinese-first; English only for proper nouns and technical terms.\n- If a non-Tech section has nothing worth reporting, write one line: `无`. Never drop the section.\n- No preamble, no footer, no \"Cronjob Response\" wrapper text.\n\n## Self-check before sending\n\n- All 9 sections present, in order, each with its emoji\n- Priorities bullets all start with action verb + timebox\n- What's next has 3-5 concrete proactive next moves and no generic advice\n- News section has 2-4 international headlines\n- Tech section is present and is sourced from HN Algolia front page\n- X section is either 2-4 posts from `twitter feed` (Agent Reach cookie channel) or `无`\n- No item appears in two sections with the same detail\n- Links are clickable markdown links\n- Message scans cleanly on mobile"
+    },
+    {
+      "id": "evening-briefing",
+      "schedule": "0 16 * * *",
+      "enabled": true,
+      "agent": "daily-briefing",
+      "prompt": "\nDelivery rule: scheduled assistant output is not auto-forwarded. If there is useful output, send it to Telegram chat `507960755` with `telegram_send_message`. If there is no material update or only healthy/no-news status, return exactly `[SILENT]` and do not send Telegram.\n\nPrepare Tony's evening briefing in Chinese. Deliver it as a single Telegram message.\n\n## Mandatory data collection\n\n- Calendar: check tomorrow's agenda.\n- News: collect 2-4 major international headlines.\n- **Tech / Hacker News: mandatory.** Fetch Hacker News front page via Algolia:\n  `https://hn.algolia.com/api/v1/search?tags=front_page&hitsPerPage=60`\n  Then rank all 60 items by Tony's interests: AI/ML, Apple, GitHub/open-source, dev tools, coding, design, infrastructure. Points are only a tiebreaker. Select 3-5 high-signal items. Do not invent items. If the API fails, put one short failure line in Tech.\n- X: **must use Agent Reach Twitter/X cookie channel**, not `xurl` or official X API. Verify/read with:\n  `twitter status --json`\n  `twitter feed -t following -n 50 --json`\n  If Following has fewer than 2 strong posts, optionally fetch:\n  `twitter feed -t for-you -n 50 --json`\n  Keep 2-4 high-signal posts only; if nothing useful, write `无`. Prefer Following over For You; filter out ads, 擦边, political ragebait, traffic alerts, and low-quality repost chains.\n\n## Output contract\n\nTitle line, then sections in this exact order (tomorrow-focused; today is already covered by morning/daytime briefings):\n\n1. 📅 `**Daily Brief — YYYY-MM-DD (周X) · 晚报**` — bold title line, one line only\n2. ⚡ **Priorities** — top 3 unfinished / carry-over items, ranked. Each bullet MUST start with an action verb + deadline/timebox (e.g., `今晚24h内` / `明早` / `本周`). One line per item.\n3. 🧭 **What's next** — proactive plan for Tony: 3-5 concrete next moves across tonight / tomorrow / this week / can-delegate. Use short bullets like `今晚：...`, `明天：...`, `本周：...`, `可委托：...`. Connect calendar, signals, current projects, LinkedIn/X posting opportunities, reimbursements, and deadlines when useful. Include a concrete LinkedIn or X writing suggestion when there is a credible prompt, e.g. `LinkedIn：<hook>` or `X：<one-line take>`. Do not write generic personal-brand advice or duplicate Priorities verbatim.\n4. 📆 **Tomorrow** — tomorrow's calendar as `HH:MM — event` bullets. Call out deep-work windows or conflicts. Do NOT recap today's meetings.\n5. 🧾 **Tasks** — ☑️ must-do tomorrow / ▫️ later. Do NOT repeat Priorities verbatim; reference them briefly if needed.\n6. 📰 **News** — 2-4 major international / macro / non-work headlines. One line each: `headline — takeaway`. Chinese-first phrasing, English only for proper nouns.\n7. 💻 **Tech** — Hacker News sourced items, 3-5 bullets, each as `• [Chinese headline](url) · {points}分 — one-line takeaway`. This section is required even if News already contains tech-adjacent macro items.\n8. 🐦 **X** — 2-4 high-signal posts as `[@handle](link): one-line point`, or `无`.\n9. 💡 **Note** — one reflection or prep nudge for tomorrow.\n\n**NO email section.** Email is now a separate independent briefing.\n\n## Deduplication rule\n\nEach piece of information appears in ONE section only. News is for world/macro; Tech is for HN items. If the same item appears in both feeds, keep it in Tech unless it is a major macro/geopolitical headline.\n\n## Formatting rules\n\n- Separate major sections with a blank line. No `---` dividers.\n- Section headers use the emoji + `**bold**` label pattern shown above.\n- Keep bullets to one idea each; no paragraphs, no tables.\n- `**bold**` only for the single most important fact per bullet.\n- Dates / amounts / IDs / names in `inline code` when it aids scanning.\n- URLs as `[descriptive text](url)` — no naked URLs.\n- Chinese-first; English only for proper nouns and technical terms.\n- If a non-Tech section has nothing worth reporting, write one line: `无`. Never drop the section.\n- No preamble, no footer, no \"Cronjob Response\" wrapper text.\n\n## Cross-briefing deduplication\n\nBefore finalizing, use `session_search` to find today's earlier briefing(s). Aggressively remove any item (news, signal, X post) already reported today UNLESS there is a material update. Do NOT remove the Tech section entirely; if all HN items were already reported, fetch current HN and pick the next 3 relevant items or state `无新高信号`.\n\n## Self-check before sending\n\n- All 9 sections present, in order, each with its emoji\n- Priorities bullets all start with action verb + deadline\n- What's next has 3-5 concrete proactive next moves and no generic advice\n- Today's meeting recap is NOT in the briefing (晚报只看明天)\n- News section has 2-4 international headlines\n- Tech section is present and is sourced from HN Algolia front page\n- X section is either 2-4 posts from `twitter feed` (Agent Reach cookie channel) or `无`\n- No item appears in two sections with the same detail\n- Links are clickable markdown links\n- No item duplicated from an earlier briefing today unless materially updated\n- Message scans cleanly on mobile"
+    },
+    {
+      "id": "night-briefing",
+      "schedule": "0 22 * * *",
+      "enabled": true,
+      "agent": "daily-briefing",
+      "prompt": "\nDelivery rule: scheduled assistant output is not auto-forwarded. If there is useful output, send it to Telegram chat `507960755` with `telegram_send_message`. If there is no material update or only healthy/no-news status, return exactly `[SILENT]` and do not send Telegram.\n\nPrepare Tony's night briefing in Chinese. Deliver it as a single Telegram message.\n\n## Mandatory data collection\n\n- Calendar: check tomorrow's agenda.\n- News: collect 2-4 major international headlines.\n- **Tech / Hacker News: mandatory.** Fetch Hacker News front page via Algolia:\n  `https://hn.algolia.com/api/v1/search?tags=front_page&hitsPerPage=60`\n  Then rank all 60 items by Tony's interests: AI/ML, Apple, GitHub/open-source, dev tools, coding, design, infrastructure. Points are only a tiebreaker. Select 3-5 high-signal items. Do not invent items. If the API fails, put one short failure line in Tech.\n- X: **must use Agent Reach Twitter/X cookie channel**, not `xurl` or official X API. Verify/read with:\n  `twitter status --json`\n  `twitter feed -t following -n 50 --json`\n  If Following has fewer than 2 strong posts, optionally fetch:\n  `twitter feed -t for-you -n 50 --json`\n  Keep 2-4 high-signal posts only; if nothing useful, write `无`. Prefer Following over For You; filter out ads, 擦边, political ragebait, traffic alerts, and low-quality repost chains.\n\n## Output contract\n\nTitle line, then sections in this exact order (tomorrow-focused + end-of-day wind-down):\n\n1. 📅 `**Daily Brief — YYYY-MM-DD (周X) · 夜报**` — bold title line, one line only\n2. ⚡ **Priorities** — top 3 unfinished / carry-over for tomorrow, ranked. Each bullet MUST start with an action verb + deadline/timebox (e.g., `明早`, `明日内`, `本周`). One line per item.\n3. 🧭 **What's next** — proactive plan for Tony: 3-5 concrete next moves across tomorrow / this week / can-delegate. Use short bullets like `明天：...`, `本周：...`, `可委托：...`. Connect calendar, signals, current projects, LinkedIn/X posting opportunities, reimbursements, and deadlines when useful. Include a concrete LinkedIn or X writing suggestion when there is a credible prompt, e.g. `LinkedIn：<hook>` or `X：<one-line take>`. Do not write generic personal-brand advice or duplicate Priorities verbatim.\n4. 📆 **Tomorrow** — tomorrow's calendar as `HH:MM — event` bullets. Call out deep-work windows or conflicts. Do NOT recap today.\n5. 🧾 **Tasks** — ☑️ must-do tomorrow / ▫️ later. Do NOT repeat Priorities verbatim.\n6. 📰 **News** — 2-4 major international / macro / non-work headlines. One line each: `headline — takeaway`. Chinese-first phrasing, English only for proper nouns.\n7. 💻 **Tech** — Hacker News sourced items, 3-5 bullets, each as `• [Chinese headline](url) · {points}分 — one-line takeaway`. This section is required even if News already contains tech-adjacent macro items.\n8. 🐦 **X** — 2-4 high-signal posts as `[@handle](link): one-line point`, or `无`.\n9. 💡 **Note** — one reflection or wind-down nudge for the night.\n\n**NO email section.** Email is now a separate independent briefing.\n\n## Deduplication rule\n\nEach piece of information appears in ONE section only. News is for world/macro; Tech is for HN items. If the same item appears in both feeds, keep it in Tech unless it is a major macro/geopolitical headline.\n\n## Formatting rules\n\n- Separate major sections with a blank line. No `---` dividers.\n- Section headers use the emoji + `**bold**` label pattern shown above.\n- Keep bullets to one idea each; no paragraphs, no tables.\n- `**bold**` only for the single most important fact per bullet.\n- Dates / amounts / IDs / names in `inline code` when it aids scanning.\n- URLs as `[descriptive text](url)` — no naked URLs.\n- Chinese-first; English only for proper nouns and technical terms.\n- If a non-Tech section has nothing worth reporting, write one line: `无`. Never drop the section.\n- No preamble, no footer, no \"Cronjob Response\" wrapper text.\n\n## Cross-briefing deduplication\n\nBefore finalizing, use `session_search` to find today's earlier briefing(s). Aggressively remove any item (news, signal, X post) already reported today UNLESS there is a material update. Do NOT remove the Tech section entirely; if all HN items were already reported, fetch current HN and pick the next 3 relevant items or state `无新高信号`.\n\n## Self-check before sending\n\n- All 9 sections present, in order, each with its emoji\n- Priorities bullets all start with action verb + deadline\n- What's next has 3-5 concrete proactive next moves and no generic advice\n- Today's recap is NOT in the briefing (夜报只看明天)\n- News section has 2-4 international headlines\n- Tech section is present and is sourced from HN Algolia front page\n- X section is either 2-4 posts from `twitter feed` (Agent Reach cookie channel) or `无`\n- No item appears in two sections with the same detail\n- Links are clickable markdown links\n- No item duplicated from an earlier briefing today unless materially updated\n- Message scans cleanly on mobile"
+    },
+    {
+      "id": "morning-email-briefing",
+      "schedule": "30 10 * * *",
+      "enabled": true,
+      "agent": "email-butler",
+      "prompt": "\nDelivery rule: scheduled assistant output is not auto-forwarded. If there is useful output, send it to Telegram chat `507960755` with `telegram_send_message`. If there is no material update or only healthy/no-news status, return exactly `[SILENT]` and do not send Telegram.\n\nPrepare Tony's morning email briefing in Chinese. Deliver as a single Telegram message.\n\n## 数据收集\n\nUse gws CLI at `/home/linuxbrew/.linuxbrew/bin/gws`.\n\n1. Broad triage (48h, exclude noise):\n```bash\n/home/linuxbrew/.linuxbrew/bin/gws gmail +triage --max 30 --query \"is:unread newer_than:2d -category:promotions -category:social -category:forums\" --format json\n```\n\n2. Important senders pass:\n```bash\n/home/linuxbrew/.linuxbrew/bin/gws gmail +triage --max 20 --query \"(TurboTax OR Intuit OR United OR Bitwarden OR Fidelity OR Synology OR State Farm OR PenFed OR USPS OR Chase OR Citi OR Amazon) newer_than:2d\" --format json\n```\n\n3. Deep-read important messages with `+read --id MESSAGE_ID --format json`.\n4. If Recruiting-labelled or recruiter/hiring emails appear in the triage window, include them with a suggested decline draft instead of saying they are ignored.\n\n## 输出格式\n\n📬 **邮件简报 — YYYY-MM-DD 早**\n\n按优先级列出，每条一行：\n- 🔥 紧急（安全/账户/支付告警）\n- 📎 重要（财务/物流/行政）\n- 💬 需回复 — 附草稿回复：`💬 草稿：「内容」`\n\n**草稿规则：**\n- 加载 tony-email-voice skill，严格遵循 Tony 写作风格\n- 简单直接的才起草；复杂/敏感标记\"需 Tony 判断\"\n- 招聘/猎头邮件必须给建议 draft，默认 Tony 风格短婉拒：\"Thanks for reaching out. I'm not looking for new opportunities right now, but appreciate you thinking of me.\"\n\n**过滤规则：**\n- 财务类必须包含金额、商户、账户标识\n- 物流类包含承运商和预计到达时间\n- 同一线程/主题合并为一条\n- 零售促销、newsletter、社交摘要直接跳过\n- 招聘邮件低优先级，但如果列出就必须附建议拒绝 draft，不能只写“忽略/无需处理”\n\n\n## Maintenance visibility\n\nBefore writing the briefing, read `/home/tonyxu/.local/state/copilot-home-assistant/email_butler_ops_latest.json` if it exists. Include a short `🛠 **Maintenance**` section near the end telling Tony what Email Butler maintenance recently did.\n\nReport only safe, useful counts/status from that file:\n- labels: labels maintained and `total_new_labeled` if > 0; otherwise say label maintenance ran with no new labels added.\n- action queue: new actionable items count if > 0; otherwise say no new action queue items.\n- sync: Gmail/Calendar collectors + gbrain imports status/counts at a high level.\n- archive: only mention if `ran_archive` is true or `total_archived` > 0; say it removed `INBOX` only, not deleted.\n\nKeep it to 1-3 bullets. Do not include message IDs, raw JSON, tokens, DB URLs, stack traces, or full email bodies. If the latest ops status is not success, surface it as a warning in this section.\n\n## 格式规则\n\n- 中文为主，英文仅用于专有名词\n- **bold** 只给真正重要的\n- 不用表格\n- 通常 5-10 条，不凑数\n- 无事可报就写一行：`📬 邮件简报 — 无新邮件`\n- No preamble, no footer"
+    },
+    {
+      "id": "evening-email-briefing",
+      "schedule": "30 15 * * *",
+      "enabled": true,
+      "agent": "email-butler",
+      "prompt": "\nDelivery rule: scheduled assistant output is not auto-forwarded. If there is useful output, send it to Telegram chat `507960755` with `telegram_send_message`. If there is no material update or only healthy/no-news status, return exactly `[SILENT]` and do not send Telegram.\n\nPrepare Tony's evening email briefing in Chinese. Deliver as a single Telegram message.\n\n## 数据收集\n\nUse gws CLI at `/home/linuxbrew/.linuxbrew/bin/gws`.\n\n1. Recent unread (last 24h, exclude noise):\n```bash\n/home/linuxbrew/.linuxbrew/bin/gws gmail +triage --max 30 --query \"is:unread newer_than:1d -category:promotions -category:social -category:forums\" --format json\n```\n\n2. Important senders pass:\n```bash\n/home/linuxbrew/.linuxbrew/bin/gws gmail +triage --max 20 --query \"(TurboTax OR Intuit OR United OR Bitwarden OR Fidelity OR Synology OR State Farm OR PenFed OR USPS OR Chase OR Citi OR Amazon) newer_than:1d\" --format json\n```\n\n3. Deep-read important messages with `+read --id MESSAGE_ID --format json`.\n4. If Recruiting-labelled or recruiter/hiring emails appear in the triage window, include them with a suggested decline draft instead of saying they are ignored.\n\n## 去重\n\nUse `session_search` to find today's morning email briefing. Remove any item already reported unless there is a material update.\n\n## 输出格式\n\n📬 **邮件简报 — YYYY-MM-DD 晚**\n\n按优先级列出，每条一行：\n- 🔥 紧急（安全/账户/支付告警）\n- 📎 重要（财务/物流/行政）\n- 💬 需回复 — 附草稿回复：`💬 草稿：「内容」`\n\n**草稿规则：**\n- 加载 tony-email-voice skill，严格遵循 Tony 写作风格\n- 简单直接的才起草；复杂/敏感标记\"需 Tony 判断\"\n- 招聘/猎头邮件必须给建议 draft，默认 Tony 风格短婉拒：\"Thanks for reaching out. I'm not looking for new opportunities right now, but appreciate you thinking of me.\"\n\n**过滤规则：**\n- 财务类必须包含金额、商户、账户标识\n- 物流类包含承运商和预计到达时间\n- 同一线程/主题合并为一条\n- 零售促销、newsletter、社交摘要直接跳过\n- 招聘邮件低优先级，但如果列出就必须附建议拒绝 draft，不能只写“忽略/无需处理”\n\n\n## Maintenance visibility\n\nBefore writing the briefing, read `/home/tonyxu/.local/state/copilot-home-assistant/email_butler_ops_latest.json` if it exists. Include a short `🛠 **Maintenance**` section near the end telling Tony what Email Butler maintenance recently did.\n\nReport only safe, useful counts/status from that file:\n- labels: labels maintained and `total_new_labeled` if > 0; otherwise say label maintenance ran with no new labels added.\n- action queue: new actionable items count if > 0; otherwise say no new action queue items.\n- sync: Gmail/Calendar collectors + gbrain imports status/counts at a high level.\n- archive: only mention if `ran_archive` is true or `total_archived` > 0; say it removed `INBOX` only, not deleted.\n\nKeep it to 1-3 bullets. Do not include message IDs, raw JSON, tokens, DB URLs, stack traces, or full email bodies. If the latest ops status is not success, surface it as a warning in this section.\n\n## 格式规则\n\n- 中文为主，英文仅用于专有名词\n- **bold** 只给真正重要的\n- 不用表格\n- 通常 5-10 条，不凑数\n- 无事可报就写一行：`📬 邮件简报 — 无新邮件`\n- No preamble, no footer"
+    },
+    {
+      "id": "night-email-briefing",
+      "schedule": "0 20 * * *",
+      "enabled": true,
+      "agent": "email-butler",
+      "prompt": "\nDelivery rule: scheduled assistant output is not auto-forwarded. If there is useful output, send it to Telegram chat `507960755` with `telegram_send_message`. If there is no material update or only healthy/no-news status, return exactly `[SILENT]` and do not send Telegram.\n\nPrepare Tony's night email briefing in Chinese. Deliver as a single Telegram message.\n\n## 数据收集\n\nUse gws CLI at `/home/linuxbrew/.linuxbrew/bin/gws`.\n\n1. Recent unread (last 8h, exclude noise):\n```bash\n/home/linuxbrew/.linuxbrew/bin/gws gmail +triage --max 30 --query \"is:unread newer_than:8h -category:promotions -category:social -category:forums\" --format json\n```\n\n2. Important senders pass:\n```bash\n/home/linuxbrew/.linuxbrew/bin/gws gmail +triage --max 20 --query \"(TurboTax OR Intuit OR United OR Bitwarden OR Fidelity OR Synology OR State Farm OR PenFed OR USPS OR Chase OR Citi OR Amazon) newer_than:8h\" --format json\n```\n\n3. Deep-read important messages with `+read --id MESSAGE_ID --format json`.\n4. If Recruiting-labelled or recruiter/hiring emails appear in the triage window, include them with a suggested decline draft instead of saying they are ignored.\n\n## 去重\n\nUse `session_search` to find today's earlier email briefings (morning + evening). Remove any item already reported unless there is a material update.\n\n## 输出格式\n\n📬 **邮件简报 — YYYY-MM-DD 夜**\n\n按优先级列出，每条一行：\n- 🔥 紧急（安全/账户/支付告警）\n- 📎 重要（财务/物流/行政）\n- 💬 需回复 — 附草稿回复：`💬 草稿：「内容」`\n\n**草稿规则：**\n- 加载 tony-email-voice skill，严格遵循 Tony 写作风格\n- 简单直接的才起草；复杂/敏感标记\"需 Tony 判断\"\n- 招聘/猎头邮件必须给建议 draft，默认 Tony 风格短婉拒：\"Thanks for reaching out. I'm not looking for new opportunities right now, but appreciate you thinking of me.\"\n\n**过滤规则：**\n- 财务类必须包含金额、商户、账户标识\n- 物流类包含承运商和预计到达时间\n- 同一线程/主题合并为一条\n- 零售促销、newsletter、社交摘要直接跳过\n- 招聘邮件低优先级，但如果列出就必须附建议拒绝 draft，不能只写“忽略/无需处理”\n\n\n## Maintenance visibility\n\nBefore writing the briefing, read `/home/tonyxu/.local/state/copilot-home-assistant/email_butler_ops_latest.json` if it exists. Include a short `🛠 **Maintenance**` section near the end telling Tony what Email Butler maintenance recently did.\n\nReport only safe, useful counts/status from that file:\n- labels: labels maintained and `total_new_labeled` if > 0; otherwise say label maintenance ran with no new labels added.\n- action queue: new actionable items count if > 0; otherwise say no new action queue items.\n- sync: Gmail/Calendar collectors + gbrain imports status/counts at a high level.\n- archive: only mention if `ran_archive` is true or `total_archived` > 0; say it removed `INBOX` only, not deleted.\n\nKeep it to 1-3 bullets. Do not include message IDs, raw JSON, tokens, DB URLs, stack traces, or full email bodies. If the latest ops status is not success, surface it as a warning in this section.\n\n## 格式规则\n\n- 中文为主，英文仅用于专有名词\n- **bold** 只给真正重要的\n- 不用表格\n- 通常 5-10 条，不凑数\n- 无事可报就写一行：`📬 邮件简报 — 无新邮件`\n- No preamble, no footer"
+    },
+    {
+      "id": "email-butler-ops",
+      "schedule": "15 8-21 * * *",
+      "enabled": true,
+      "agent": "email-butler",
+      "prompt": "\nDelivery rule: scheduled assistant output is not auto-forwarded. If there is useful output, send it to Telegram chat `507960755` with `telegram_send_message`. If there is no material update or only healthy/no-news status, return exactly `[SILENT]` and do not send Telegram.\n\nRun Tony's consolidated Email Butler ops.\n\nExecute:\n`bash -lic '/home/tonyxu/copilot-home-assistant/scripts/email_butler_ops.py'`\n\nThis job owns:\n- hourly Gmail label maintenance\n- hourly read-only Action Queue detection\n- low-risk archive during the 19:00 hour\n- Gmail/Calendar collection + staging + gbrain import at local hours 08/12/16/20 only (`--sync-hours` default)\n\nParse the JSON output.\n- If `status` is not `success`, send a short Chinese alert. Include failing layer/step, root cause if visible, and impact. Redact secrets, DB URLs, tokens, OAuth credentials, and message IDs. No raw JSON or stack traces.\n- Determine reportable Action Queue items from `new_action_items` only.\n- If `status: success` and `new_action_items` is empty, respond exactly `[SILENT]`, even if diagnostic counters such as `new_action_count`, `candidate_count`, or `filtered_count` are nonzero.\n- If `status: success` and `new_action_items` is non-empty, send a concise Telegram message in Chinese:\n  - First line: `**Email Action Queue**`\n  - Then 1 bullet per item, max 5 bullets.\n  - Include kind, sender, and subject only. No message IDs. No full bodies.\n  - If an item includes `suggested_reply`, include it under that item as `💬 建议回复：` followed by the draft text.\n  - Recruiting/headhunter items should include a suggested decline draft when present; do not say they are merely ignored.\n  - Never invent placeholder bullets like “未返回”; if item details are missing, treat it as no reportable item and use `[SILENT]`.\n- Safety: never delete, mark read, send, reply, forward, create/delete calendar events, or schedule other cron jobs."
+    },
+    {
+      "id": "monthly-phone-internet-reimbursement-reminder",
+      "schedule": "0 10 14 * *",
       "enabled": true,
       "agent": "finance-manager",
-      "prompt": "Scan Gmail inbox for bills, receipts, and time-sensitive action items. Auto-log expenses from receipts, create tasks for anything needing follow-up, flag overdue bills."
+      "prompt": "\nDelivery rule: scheduled assistant output is not auto-forwarded. If there is useful output, send it to Telegram chat `507960755` with `telegram_send_message`. If there is no material update or only healthy/no-news status, return exactly `[SILENT]` and do not send Telegram.\n\n每月提醒 Tony 提交话费和网费报销。背景：上次报销覆盖的是 12/13 生成的网费账单和 1/13 生成的话费账单；账单通常每月 13 号生成，所以提醒设在每月 14 号。请用中文、Telegram 移动端短消息格式输出，只发提醒本身，不要解释任务配置。提醒内容应包括：该提交话费和网费报销了；确认本月 13 号生成的两张账单；提交后可以标记完成。"
     },
     {
-      "id": "daily-finance-review",
-      "schedule": "30 6 * * *",
+      "id": "daily-content-editor",
+      "schedule": "30 18 * * *",
       "enabled": true,
-      "agent": "finance-manager",
-      "prompt": "Run daily financial review. Sync accounts, check for unusual charges in the last 24h, flag new subscriptions or merchants not seen before, check if any budget category hit 80%+, and send a brief Telegram summary to {{PARENT_1}} ({{TELEGRAM_PARENT_1}}). Only message if there's something actionable — no noise. Use speak parameter."
+      "agent": "content-editor",
+      "prompt": "\nDelivery rule: scheduled assistant output is not auto-forwarded. If there is useful output, send it to Telegram chat `507960755` with `telegram_send_message`. If there is no material update or only healthy/no-news status, return exactly `[SILENT]` and do not send Telegram.\n\nTony wants a daily editorial workflow that can turn selected fragmented thoughts, saved links, notes, and personal activity signals into public-safe X/Twitter and LinkedIn draft options.\n\nUse these skills and follow their current instructions: x-twitter-workflows, linkedin-workflows, memory, gbrain-operations, limemo-capture.\n\nCanonical repo: /home/tonyxu/brain\n\nRules:\n- Brain repo is the canonical human-readable source; GBrain is the searchable/indexed layer.\n- memo = general personal memo, not a content inbox. Raw personal memo path: /home/tonyxu/brain/notes/memo/YYYY-MM-DD.md.\n- limemo = work memo. Raw work memo path: /home/tonyxu/brain/notes/work/memo/YYYY-MM-DD.md.\n- Preserve raw fragments before interpretation. Then route obvious durable items into structured notes under people/, projects/, notes/, or notes/work/.\n- Writing lives under /home/tonyxu/brain/notes/writing/, not notes/knowledge/writing/.\n- All collected likes/favorites/saves must first be represented in /home/tonyxu/brain/daily/activity/YYYY/YYYY-MM-DD.md as the cross-source day ledger. Date-shard by the content generation date when available, not export date. Examples: X tweet createdAtISO/createdAtLocal, YouTube release/published timestamp, Xiaohongshu item publish/create timestamp, Douban added_at when it is the saved/rated activity timestamp, Google Maps list_added_at_utc. Use export/collection date only as an explicit labeled fallback: date_basis: collection_date.\n- Keep source exports under sources/... as provenance. Do not replace source provenance with synthesized notes.\n- Activity signals are inspiration/ranking evidence, not Tony-authored claims or automatic endorsements.\n- Optional synthesis path: /home/tonyxu/brain/notes/writing/activity-inspiration/YYYY-MM-DD.md.\n- Draft output path: /home/tonyxu/brain/notes/writing/content-drafts/YYYY-MM-DD.md.\n- Draft only. Do not auto-publish to X or LinkedIn.\n- Do not read/import notes/records/private/, credentials, cookies, tokens, API keys, or company internal Slack/comms.\n- For company-sensitive content, only use work memo Tony explicitly provided, and keep public drafts high-level/public-safe.\n\nDaily workflow:\n1. Read recent raw memo/limemo and structured notes from the last 24-36h.\n2. Check daily/activity for recent activity ledger coverage. If recent collected source exports exist but the corresponding daily activity file is missing, create/update the daily activity file using the content generation date rule above before synthesis.\n3. Build or update activity-inspiration/YYYY-MM-DD.md only for high-signal recurring themes.\n4. Produce a compact content-drafts/YYYY-MM-DD.md with selected public-safe X/LinkedIn draft options, linked back to source notes/activity.\n5. Sync touched Markdown pages to GBrain narrowly with gbrain put <slug> < file.md then gbrain embed <slug>. Use gbrain embed --stale only for batch reconciliation or if stats show Embedded < Chunks.\n6. Deliver a Telegram message only if there are useful drafts, errors, warnings, or blockers. No routine success noise."
     },
     {
-      "id": "weekly-finance-digest",
-      "schedule": "0 8 * * 1",
+      "id": "social-activity-collector",
+      "schedule": "40 8 * * *",
       "enabled": true,
-      "agent": "finance-manager",
-      "prompt": "Run weekly financial health digest. Compare this week's spending to last week and the 4-week average by category. Calculate month-to-date budget adherence. Check debt snowball progress. Identify subscriptions with no recent usage (> 45 days since last charge change). Find cost reduction opportunities. Send comprehensive weekly financial health report to {{PARENT_1}} via Telegram ({{TELEGRAM_PARENT_1}}) with speak parameter. Create tasks for any action items found."
+      "agent": "social-activity-collector",
+      "prompt": "\nDelivery rule: scheduled assistant output is not auto-forwarded. If there is useful output, send it to Telegram chat `507960755` with `telegram_send_message`. If there is no material update or only healthy/no-news status, return exactly `[SILENT]` and do not send Telegram.\n\nRun Tony's consolidated social/activity collector. Notify only on real problems.\n\nContext:\n- Workdir: `/home/tonyxu/brain`.\n- This job must be quiet on success. Do not send routine success messages.\n- It must collect Tony's X social activity, including **likes, original posts, quote posts, replies exposed by UserTweets (`in_reply_to_*` GraphQL fields), and reposts/retweets**. The X source sync is `/home/tonyxu/copilot-home-assistant/scripts/sync_x_likes_to_gbrain.py`; despite the historical filename, it syncs both `sources/x-likes/` and `sources/x-posts/` unless `--likes-only` or `--posts-only` is passed. Do not pass those flags.\n- Then run the daily activity builder/verifier so `daily/activity/YYYY/YYYY-MM-DD.md` includes X likes, X posts, X replies, and X reposts from `sources/x-likes/latest/` and `sources/x-posts/latest/`, plus other supported sources.\n- Do not read, import, embed, or expose `notes/records/secrets/`.\n\nExecute:\n1. `twitter status --json` to verify cookie auth.\n2. `/home/tonyxu/copilot-home-assistant/scripts/sync_x_likes_to_gbrain.py` with no likes/posts limiting flags.\n3. `python3 scripts/collect_activity.py --quiet-success`.\n4. `python3 scripts/verify_daily_activity_coverage.py --json`.\n\nSuccess criteria:\n- X sync exits 0 and refreshes both latest aliases:\n  - `sources/x-likes/latest/twitter_likes_agent_reach_latest.jsonl`\n  - `sources/x-posts/latest/twitter_posts_agent_reach_latest.jsonl`\n- Posts export classifies reply records as `kind=reply` when UserTweets raw GraphQL exposes reply metadata, and coverage verification is ok with source labels `X likes`, `X posts`, `X replies`, and `X reposts`.\n- Notify Tony only if any command fails, auth is broken, latest aliases are missing/stale, reply extraction regresses, or coverage verification fails/misses those X source labels. Include concise diagnostics and the failing command. Otherwise final response should be empty/quiet."
     },
     {
-      "id": "meal-plan-prompt",
-      "schedule": "0 17 * * 0",
+      "id": "daily-workflow-hygiene",
+      "schedule": "45 11 * * *",
       "enabled": true,
-      "agent": "nutrition-chef",
-      "prompt": "Ask {{PARENT_1}} what he wants to cook next week via Telegram. Do NOT suggest recipes or meals — just ask what HE wants on the plan. If he already told you earlier, use set_meal to populate the plan and generate_grocery_list for the shopping list. Check data/family/kitchen-inventory.md for available equipment before confirming any meal that requires specific appliances."
+      "agent": "workflow-hygiene",
+      "prompt": "\nDelivery rule: scheduled assistant output is not auto-forwarded. If there is useful output, send it to Telegram chat `507960755` with `telegram_send_message`. If there is no material update or only healthy/no-news status, return exactly `[SILENT]` and do not send Telegram.\n\nDaily workflow hygiene audit for Tony's automation. Run quietly and only report problems or material changes.\n\nScope:\n- Local workflow scripts/state: `/home/tonyxu/brain/scripts/`, `/home/tonyxu/brain/state/`.\n- Adjacent local automation: `crontab -l`, `systemctl --user list-timers --all --no-pager`, and active gbrain-related processes.\n\nRequired checks:\n1. Parse all cron job JSON files. Verify unique job IDs, enabled scheduled jobs have sane `next_run_at`, no missing referenced skills, no active orphan output dirs, and recent `last_delivery_error` values are surfaced.\n2. Inspect latest output per active job. Do not trust global grep alone because output includes loaded skill/code text. Treat only response/result section or delivery metadata as real failure.\n3. Run lightweight syntax checks for production workflow Python scripts when they exist:\n   - `/home/tonyxu/copilot-home-assistant/scripts/email_butler_ops.py`\n   - `/home/tonyxu/copilot-home-assistant/scripts/email_butler_label_maintenance.py`\n   - `/home/tonyxu/copilot-home-assistant/scripts/email_butler_action_queue.py`\n   - `/home/tonyxu/copilot-home-assistant/scripts/email_butler_low_risk_archive.py`\n   - `/home/tonyxu/copilot-home-assistant/scripts/sync_x_likes_to_gbrain.py`\n   - `/home/tonyxu/brain/scripts/collect_activity.py`\n   - `/home/tonyxu/brain/scripts/verify_daily_activity_coverage.py`\n4. Check disk usage for `/`, key state dirs.\n5. Verify known current policy remains true:\n   - `email-butler-ops` runs hourly for label/action queue, but sync is throttled by script default `--sync-hours` to local hours `8,12,16,20`.\n   - Main daily briefings do not contain duplicated `📊 **Signals**` / system polling sections.\n   - ADU checker is a quiet change detector that emits `[SILENT]` on no material change.\n   - `daily-content-editor` and `social-activity-collector` use workdir `/home/tonyxu/brain`.\n   - family profile simple reminder/script-pass-through jobs have empty toolsets `[]`.\n   - parents duplicate Weixin portfolio job `53881638d8fb` remains paused while Telegram portfolio job remains active.\n\nAllowed automatic fixes:\n- Move active-orphan cron output directories into `_archived_orphan_outputs_YYYYMMDD/` under the same output root. Move, do not delete.\n- Re-parse/reformat JSON only if needed to preserve valid JSON and do not change semantic fields.\n\nDo NOT automatically:\n- Delete files or outputs.\n- Create/remove/pause/resume/update cron jobs.\n- Change delivery destinations.\n- Change schedules.\n- Touch credentials, tokens, OAuth files, `.env`, backups, or security settings.\n- Send email/messages outside the cron final response.\n- Schedule any other cron jobs.\n\nReporting contract:\n- If all checks are healthy and no automatic archival was done, respond exactly `[SILENT]`.\n- If you archived orphan outputs, found errors, or found actionable recommendations, send a concise Chinese Telegram update:\n  - First line: `**Workflow Hygiene** — <main finding>`\n  - 3-6 bullets max.\n  - Include exact job/profile names and IDs only when useful.\n  - Redact secrets, tokens, OAuth credentials, DB URLs, and message IDs as `[REDACTED]`.\n  - Separate `已自动处理` from `需要 Tony 拍板`.\n\nSafety: health is silent; no routine success messages."
     },
     {
-      "id": "monday-handoff",
-      "schedule": "0 5 * * 1",
+      "id": "daily-second-brain-health",
+      "schedule": "20 12 * * *",
       "enabled": true,
-      "agent": "weekly-planner"
-    },
-    {
-      "id": "content-schedule-maintenance",
-      "schedule": "45 7,11,15,19 * * *",
-      "enabled": true,
-      "agent": "content-scheduler"
-    },
-    {
-      "id": "luna-checkin",
-      "schedule": "10 8,12,16,20 * * *",
-      "enabled": true,
-      "agent": "luna",
-      "prompt": "Check in with {{PARENT_2}}. Load your memory first — check engagement tracking to see if you should skip this cycle. If not, pick a vibe that fits the time of day and send ONE short message to {{PARENT_2}} (chat_id: {{TELEGRAM_PARENT_2}}). Be her friend, not a bot."
-    },
-    {
-      "id": "parent-support-weekly",
-      "schedule": "0 9 * * 1",
-      "enabled": true,
-      "agent": "parent-support",
-      "prompt": "Weekly benefits check-in. Load memory tiers. Review ALL active benefits — check for approaching deadlines (next 14 days), stale statuses (no update in 14+ days), and newly-eligible programs. Create tasks for any actions needed. Research any programs in 'researching' status. Send {{PARENT_1}} a concise status summary via Telegram. Update working memory."
-    },
-    {
-      "id": "content-analytics-check",
-      "schedule": "5 8,14,20 * * *",
-      "enabled": true,
-      "agent": "content-analytics",
-      "prompt": "Run your analytics check cycle. Load memory, pull performance data across all platforms, compute deltas against previous snapshots, check for engagement anomalies. Update working memory with new snapshots. If notable findings (viral post, significant growth, engagement drop), notify {{PARENT_1}} via Telegram."
-    },
-    {
-      "id": "content-analytics-comments",
-      "schedule": "35 9,15,21 * * *",
-      "enabled": true,
-      "agent": "content-analytics",
-      "prompt": "Run your comment management cycle. Load memory, scan recently published posts (last 48h) for new comments using late_list_comments (cross-platform). Classify comments by sentiment. ACTIVELY REPLY to questions (with source links), positive feedback (thank + engage), and constructive criticism (acknowledge + address) using late_reply_comment. Use late_hide_comment for spam/abuse. Flag brand-sensitive or controversial comments as agent-surface tasks. Follow per-platform etiquette (LinkedIn=professional, Twitter=casual, YouTube=friendly). Max 20 replies per cycle. Log all activity."
-    },
-    {
-      "id": "content-analytics-weekly-report",
-      "schedule": "0 18 * * 0",
-      "enabled": true,
-      "agent": "content-analytics",
-      "prompt": "Generate the weekly performance report. Pull 7-day analytics across all platforms. Calculate: total reach, total engagement, avg engagement rate, top 3 posts, bottom 3 posts, follower growth. Compare week-over-week. Compute pillar-by-pillar performance breakdown. Identify content type and timing patterns. Generate actionable recommendations. Send full report to {{PARENT_1}} via Telegram (chat_id: {{TELEGRAM_PARENT_1}})."
-    },
-    {
-      "id": "nicu-care-checkin",
-      "schedule": "30 7,9,11,13,15,17,19,21 * * *",
-      "enabled": true,
-      "agent": "nicu-care",
-      "prompt": "NICU care check-in. Load your memory tiers first. Compute current CT time via PowerShell. Check if a pumping reminder is due (compare current time against schedule in data/nicu/schedule.json — send reminders 15 min before each session). If a pump reminder is due, send encouraging reminders to BOTH {{PARENT_1}} ({{TELEGRAM_PARENT_1}}) and {{PARENT_2}} ({{TELEGRAM_PARENT_2}}) — keep {{PARENT_2}}'s message to 2-3 lines max. AGENT-TASK SELF-CHECK: query list_tasks(created_by='nicu-care', surface='agent', status='pending') — execute any you can handle (send reminders, log data, close stale monitoring tasks). Mark done via complete_task when finished. Check for any pending data collection items. Generate proactive tasks if needed (NICU visit prep, supply checks, upcoming deadlines). Log any updates to pumping-log.json or baby-journal.json if new data was shared. Update working memory before ending."
-    },
-    {
-      "id": "repo-maintainer-pr-review",
-      "schedule": "50 8,13,18 * * *",
-      "enabled": true,
-      "agent": "repo-maintainer",
-      "prompt": "Run PR review cycle. Scan all {{GITHUB_USERNAME}} repos for open PRs. Apply merge policy: auto-merge dependabot/bot PRs with green CI (squash + delete branch), review {{PARENT_1}}'s PRs and notify, close stale Copilot drafts >60 days. Max 10 auto-merges per run. Only message {{PARENT_1}} if actions were taken."
-    },
-    {
-      "id": "repo-maintainer-issue-triage",
-      "schedule": "0 8 * * *",
-      "enabled": true,
-      "agent": "repo-maintainer",
-      "prompt": "Run issue triage cycle. Search for untriaged issues across {{GITHUB_USERNAME}} repos (no:label or no:assignee). Auto-label by content pattern. Assign straightforward bugs/features/docs to Copilot. Flag security issues to {{PARENT_1}} immediately. Close stale issues >180 days with no activity. Don't close content-management issues (content backlog). Only message {{PARENT_1}} if actions were taken."
-    },
-    {
-      "id": "repo-maintainer-weekly-report",
-      "schedule": "0 20 * * 0",
-      "enabled": true,
-      "agent": "repo-maintainer",
-      "prompt": "Generate weekly repo health report. Scan all {{GITHUB_USERNAME}} repos: count open PRs/issues, check CI status, identify stale items, count what was merged/closed this week. Send structured Telegram report to {{PARENT_1}} ({{TELEGRAM_PARENT_1}}). Always send this report even if everything is clean."
-    },
-    {
-      "id": "wellness-coach-morning",
-      "schedule": "0 8 * * *",
-      "enabled": true,
-      "agent": "wellness-coach",
-      "prompt": "Morning wellness check-in. Load your memory tiers. Compute current CT time. Check {{PARENT_1}}'s observations from last night. Review any BP readings, sleep data, or anxiety indicators. If concerning patterns, create a task for {{PARENT_1}} with specific guidance. Update working memory with morning assessment. Do NOT contact {{PARENT_2}} directly — work through {{PARENT_1}} and Luna."
-    },
-    {
-      "id": "wellness-coach-midday",
-      "schedule": "0 13 * * *",
-      "enabled": true,
-      "agent": "wellness-coach",
-      "prompt": "Midday wellness check-in. Load memory. Review any new data since morning (pump sessions as stress indicator, NICU updates, task completions). If {{PARENT_1}} or {{PARENT_2}} reported anxiety/stress, prepare a grounding technique suggestion as a task for {{PARENT_1}} to relay. Brief check — skip if no new data. Update working memory."
-    },
-    {
-      "id": "wellness-coach-evening",
-      "schedule": "0 18 * * *",
-      "enabled": true,
-      "agent": "wellness-coach",
-      "prompt": "Evening wellness wrap-up. Load memory. Summarize today's wellness indicators (BP, anxiety, sleep quality from last night, medication adherence). Log daily summary to long-term memory. If any concerns emerged today, create a consolidated task for {{PARENT_1}} with specific next steps. Prepare any bedtime relaxation suggestions. Update working memory with end-of-day assessment."
-    },
-    {
-      "id": "context-audit-weekly",
-      "schedule": "0 20 * * 0",
-      "enabled": true,
-      "agent": "context-auditor",
-      "prompt": "Run FULL weekly context audit. Load memory. Collect ALL files in audit scope: constitution.md, copilot-instructions.md, standing-orders.md, all .github/agents/*.agent.md, all data/agents/*/core.md, all data/agents/*/working.md, cron.json. Measure file sizes and estimate token counts. Launch parallel sub-agents with different models: (1) claude-sonnet-4.5 for contradiction detection, (2) claude-haiku-4.5 for redundancy/bloat analysis, (3) claude-opus-4.5 for skill extraction opportunities. Synthesize findings. Auto-fix safe issues (stale dates, typos, dead references, exact duplicates). Create tasks for complex fixes needing approval. Commit auto-fixes via gh hookflow git-push. Send structured report to {{PARENT_1}} ({{TELEGRAM_PARENT_1}}) with: files scanned, issues by severity, auto-fixes applied, top findings, token budget per agent. Update memory."
-    },
-    {
-      "id": "context-audit-daily",
-      "schedule": "0 6 * * *",
-      "enabled": true,
-      "agent": "context-auditor",
-      "prompt": "Run QUICK daily context scan. Load memory. Focus on: (1) Contradiction check — scan foundational docs vs agent definitions for rule conflicts. (2) Working memory freshness — flag any data/agents/*/working.md not updated in 3+ days that has an active cron job. (3) Cron alignment — verify every cron.json agent entry has a matching .agent.md file. (4) AGENT-TASK SELF-CHECK: query list_tasks(created_by='context-auditor', surface='agent', status='pending') — execute any tasks you can handle (fix stale refs, update docs). Mark done via complete_task when finished. No auto-fixes on other items. Accumulate findings for weekly audit. Only message {{PARENT_1}} ({{TELEGRAM_PARENT_1}}) if critical contradictions found. Update memory."
-    },
-    {
-      "id": "parenting-coach-morning",
-      "schedule": "0 8 * * *",
-      "enabled": true,
-      "agent": "parenting-coach",
-      "prompt": "Morning parenting check-in. Load your memory tiers. Compute current CT time. Review the family's current parenting situations — {{CHILD_1_NAME}}'s sibling adjustment, NICU parenting dynamics, and {{PARENT_2}}'s confidence indicators. Send ONE proactive tip or pep talk to {{PARENT_1}} ({{TELEGRAM_PARENT_1}}) based on what's relevant today. Vary content: tips, gotchas, celebrations, situational advice. If there's a specific situation being tracked, follow up on it. Keep {{PARENT_2}} messages rare and warm (2-3 lines max, only if genuinely encouraging). Create tasks for any parenting actions needed. Update working memory."
-    },
-    {
-      "id": "parenting-coach-afternoon",
-      "schedule": "0 14 * * *",
-      "enabled": true,
-      "agent": "parenting-coach",
-      "prompt": "Afternoon parenting check-in. Load your memory tiers. Compute current CT time. This is typically post-NICU-visit time — check if there's guidance needed for {{CHILD_1_NAME}} after parents return from hospital. Provide situational advice if an active parenting situation needs follow-up. If nothing active, share a quick anticipatory tip or stay silent. Don't repeat morning's message topic. Max 1 Telegram to {{PARENT_1}}. Update working memory."
-    },
-    {
-      "id": "content-creative-daily",
-      "schedule": "0 7 * * 1-5",
-      "enabled": true,
-      "agent": "content-creative",
-      "prompt": "Daily LinkedIn post generation. Load your memory. Compute current CT time. Select a topic from: (1) {{GITHUB_USERNAME}}/content-management issues with status:ready or status:idea labels, (2) trending AI/dev topics via perplexity, (3) content pillar rebalancing. Research the topic. Write a LinkedIn post in {{PARENT_1}}'s voice. Generate an AI image via OpenAI. Upload to Late and schedule for the next optimal LinkedIn posting time. Send {{PARENT_1}} a preview via Telegram. Update memory."
-    },
-    {
-      "id": "content-creative-article-promo",
-      "schedule": "0 12 * * 1-5",
-      "enabled": true,
-      "agent": "content-creative",
-      "prompt": "Daily {{PERSONAL_DOMAIN}} article promotion on LinkedIn (SEO/backlink workflow). Load your memory. Compute current CT time. Read data/agents/content-creative/article-promo-log.json to see recently promoted articles. Browse the {{PERSONAL_DOMAIN}} article catalog by running: Get-ChildItem 'C:\\Repos\\{{GITHUB_USERNAME}}\\personal-site\\src\\content\\articles' -Filter '*.mdx' | Where-Object { $_.Name -notmatch 'weekly' }. EXCLUDE weekly roundup articles (azure-weekly, github-weekly, vscode-weekly, visual-studio-weekly, copilot-cli-weekly). Pick ONE evergreen article that: (1) was NOT promoted in the last 30 days (check the log), (2) is high-value thought leadership, (3) varies in pillar from yesterday's pick. Read the chosen article's frontmatter and first 50 lines to understand its content. Write a LinkedIn post that: hooks with a bold insight from the article, delivers 2-3 key takeaways in {{PARENT_1}}'s voice, ends with a CTA pointing to the full article on {{PERSONAL_DOMAIN}}. INCLUDE the article URL in the post body (e.g., https://{{PERSONAL_DOMAIN}}/articles/SLUG) — the goal is SEO backlinks so the link MUST be present. Run brand safety check per copilot-brand-safety skill. Generate an AI infographic image via the image-generation skill summarizing the article's key points. Upload image to Late via presign. Schedule the post for the next available LinkedIn slot (target 12:30 PM CT). Update article-promo-log.json with the promoted article slug and date. Send {{PARENT_1}} a preview via Telegram with speak parameter. Update working memory."
-    },
-    {
-      "id": "entrepreneur-coach-daily",
-      "schedule": "0 9 * * *",
-      "enabled": true,
-      "agent": "entrepreneur-coach",
-      "prompt": "Daily entrepreneurship check-in. Load entrepreneur-coach memory AND read data/agents/entrepreneur-driver/working.md for execution state. Compute current CT time. Review strategy priorities, shipped assets, scheduled validation posts, open entrepreneur tasks, and any signs of progress or drift. Push {{PARENT_1}} toward ONE high-leverage next move only — not a giant list. If there is nothing meaningful to push, stay silent. Create tasks for any newly discovered entrepreneurship actions. Update entrepreneur-coach memory and events log before ending."
-    },
-    {
-      "id": "template-scheduler",
-      "schedule": "15 7,12,17 * * *",
-      "enabled": true,
-      "agent": "platform-manager",
-      "prompt": "Run check_scheduled_triggers from the action-tracker extension.This evaluates schedule-based template triggers (e.g., paula-shower at 7 PM daily). Auto-expand templates with auto_expand=true, suggest others via Telegram to {{PARENT_1}}. Quick check — skip if nothing is due."
-    },
-    {
-      "id": "template-sync",
-      "schedule": "30 21 * * *",
-      "enabled": true,
-      "agent": "template-sync",
-      "prompt": "Run daily template sync. Diff rocha-family against copilot-home-assistant, strip PII, and create/update sync PR. Follow the progressive sync strategy. Check working memory for current state and what's next. Load pii-mapping.json before processing files."
-    },
-    {
-      "id": "work-life-sync",
-      "schedule": "55 6,12,18 * * 1-5",
-      "enabled": true,
-      "agent": "work-life-sync",
-      "prompt": "Run calendar-to-Outlook availability sync. Load memory tiers. Compute current CT time. Check Google OAuth status — if expired, create ONE re-auth task and stop. Fetch personal Google Calendar events (next 3 days). Filter: weekdays only, time-bound (or all-day with PTO keywords), future only. Compute delta against synced events in working memory. For new/changed/deleted events, send structured mesh message to msix-home with OOF block instructions (showAs=oof, private, no attendees, no Teams, timezone {{TIMEZONE}}). Update sync state in working memory. Only message {{PARENT_1}} on errors. Update events.log."
-    },
-    {
-      "id": "realtor-team-standup",
-      "schedule": "0 8 * * 1",
-      "enabled": true,
-      "agent": "realtor-team",
-      "prompt": "Run weekly team standup. Load all team memory (core, working, manifest, progress). Compute current CT time. Determine current phase. Dispatch active sub-agents for this phase. Collect reports, update progress, and send Telegram summary to {{PARENT_1}} if noteworthy. Update working memory and events log."
-    },
-    {
-      "id": "cloud-cost-audit",
-      "schedule": "0 8 * * 1",
-      "enabled": true,
-      "agent": "cloud-advisor",
-      "prompt": "Run weekly AWS cost audit. Load memory tiers. Scan all regions for resources: EC2 instances (running + stopped), unattached EBS volumes, unassociated Elastic IPs, RDS instances, S3 buckets without lifecycle policies, idle Lambda functions. Pull Cost Explorer data for current month vs last month. Auto-cleanup: delete unattached EBS volumes, release unassociated EIPs, abort stale multipart uploads. Calculate total waste eliminated. Create tasks for optimizations requiring approval (instance termination, rightsizing). Send structured cost report to {{PARENT_1}} via Telegram ({{TELEGRAM_PARENT_1}}) with speak parameter. Update working memory with new inventory and cost data."
-    },
-    {
-      "id": "skill-optimizer-scan",
-      "schedule": "5 8,16 * * *",
-      "enabled": true,
-      "agent": "skill-optimizer",
-      "prompt": "Run hourly optimization scan. Load memory tiers first. Audit agents, skills, and extensions for: (1) stale or contradicting skills, (2) skill extraction opportunities from bloated agents, (3) orphaned skills with no agent references, (4) agents not referencing skills they should know about, (5) extensions that don't align with current skill/agent definitions. Use the research-tools skill hierarchy for any lookups. Resolve issues directly — don't just flag them. Update working memory with findings. ALWAYS send a brief Telegram summary to {{PARENT_1}} (chat_id: {{TELEGRAM_PARENT_1}}) with speak parameter after each scan — even if nothing was found. Include: scan number, changes made (or 'clean pass'), agent/skill counts, and any issues resolved."
-    },
-    {
-      "id": "milk-mama-checkin-hourly",
-      "schedule": "10 9,13,17 * * *",
-      "enabled": true,
-      "agent": "milk-mama",
-      "prompt": "Hourly dev check-in — load memory tiers, pick up where you left off, implement the next item in the current phase. Run tests, commit code to {{GITHUB_USERNAME}}/milkmama and push. Update working memory with progress. Send brief status update to {{PARENT_1}} via Telegram ({{TELEGRAM_PARENT_1}}) with speak parameter if significant progress was made. At 9 AM: include full standup format (phase, yesterday's progress, today's plan, blockers, status). You have Stripe keys in repo secrets — use them for payment integration. Detect diminishing returns — if stuck for 2+ cycles on the same issue, escalate to {{PARENT_1}}."
-    },
-    {
-      "id": "sms-outreach",
-      "schedule": "40 10,16 * * *",
-      "enabled": true,
-      "agent": "sms-outreach",
-      "prompt": "Load core.md, working.md, and contacts.json. Check replies via phone-read_sms before any new sends. If {{PARENT_1}} has not approved the campaign, do NOT send SMS; just maintain state and update progress. Once approved, send 5-10 personalized outreach messages from pending contacts, respect opt-outs, track replies, and update working memory."
-    },
-    {
-      "id": "agent-task-executor",
-      "schedule": "0 8,12,16,20 * * *",
-      "enabled": true,
-      "agent": "platform-manager",
-      "prompt": "Invoke the agent-task-executor skill. Execute pending agent-surface tasks following the skill protocol: query → filter → prioritize → batch (3-4) → dispatch dedicated agents in parallel → wait for completion → report results. Max 2 batches this cycle. Quality over speed — each task gets a focused agent."
-    },
-    {
-      "id": "client-site-template-a-checkin-hourly",
-      "schedule": "25 9,13,17 * * *",
-      "enabled": true,
-      "agent": "client-site-template-a",
-      "prompt": "Hourly dev check-in — load memory tiers, pick up where you left off, implement the next item in the current phase. Run build, commit code to {{GITHUB_USERNAME}}/client-site-template-a and push. Update working memory with progress. Send brief status update to {{PARENT_1}} via Telegram ({{TELEGRAM_PARENT_1}}) with speak parameter if significant progress was made. At 9 AM: include full standup format (phase, yesterday's progress, today's plan, blockers, status)."
-    },
-    {
-      "id": "article-maintenance-daily",
-      "schedule": "0 6 * * *",
-      "enabled": true,
-      "agent": "article-maintenance",
-      "prompt": "Daily article maintenance run. Load memory tiers first (core.md + working.md). Check where you left off in the tag backlog. Process next batch of 5-10 untagged articles: read each article's content, assign 3-6 tags from the taxonomy in core.md, update frontmatter. Run SEO spot-check on 3-5 random articles (description length, title length, heading structure). Check 2-3 articles for broken internal links (verify linked article slugs exist). Commit all changes to personal-site and push directly to main. Update working.md with progress (articles tagged, issues found, next batch). Only notify {{PARENT_1}} via Telegram ({{TELEGRAM_PARENT_1}}, use speak param) if something actionable was found (broken links, major SEO gaps, milestone reached). Silent otherwise."
-    },
-    {
-      "id": "client-site-template-b-morning-sprint",
-      "schedule": "*/30 6-8 * * *",
-      "enabled": false,
-      "agent": "client-site-template-b",
-      "prompt": "Aggressive morning sprint — check current project status from memory files (data/agents/client-site-template-b/core.md, working.md, and long-term.md as needed), review the spec (data/specs/client-site-template-b-site-v1.md), check and execute any pending agent-surface tasks relevant to this client site, then continue working on the highest-priority item. Run build before any push, update working memory with progress, and send {{PARENT_1}} a concise Telegram progress update at chat_id {{TELEGRAM_PARENT_1}} ALWAYS using the speak parameter."
-    },
-    {
-      "id": "client-site-template-b-daily-checkin",
-      "schedule": "0 9 * * *",
-      "enabled": true,
-      "agent": "client-site-template-b",
-      "prompt": "Daily check-in — check current project status from memory files (data/agents/client-site-template-b/core.md, working.md, and long-term.md as needed), review the spec (data/specs/client-site-template-b-site-v1.md), check and execute any pending agent-surface tasks relevant to this client site, then continue working on the highest-priority item. Run build before any push, update working memory with progress, and send {{PARENT_1}} a concise Telegram progress update at chat_id {{TELEGRAM_PARENT_1}} ALWAYS using the speak parameter. Include a standup format with phase, yesterday's progress, today's plan, blockers, and status."
-    },
-    {
-      "id": "google-ads-daily-metrics",
-      "schedule": "0 7 * * *",
-      "enabled": true,
-      "agent": "google-ads-manager",
-      "prompt": "Daily metrics check and exploration run. Load memory tiers (core.md + working.md). Compute current CT time. Follow the Daily Metrics Check Workflow from your agent definition. Phase 1: Auth check via Playwright — navigate to ads.google.com/aw/campaigns. If not authenticated, notify {{PARENT_1}} ({{TELEGRAM_PARENT_1}}, speak param) and stop. Phase 2: Dismiss ad blocker dialog, collect campaign metrics (impressions, clicks, CTR, conversions, cost). Compare against previous day's snapshot in working.md. Phase 3: Check conversion status for all 5 actions. Check Google tag hit count. Phase 4: Pick ONE unexplored page from the exploration queue in .github/skills/google-ads-playwright/SKILL.md — explore it, document URL, selectors, data available. Update the skill SKILL.md with findings. Phase 5: Update working.md with today's metrics snapshot, exploration progress. Append events.log. Send concise Telegram summary ({{TELEGRAM_PARENT_1}}, speak param) — lead with metrics, then deltas, then exploration findings. Silent if no campaigns and no notable findings."
-    },
-    {
-      "id": "google-ads-weekly-report",
-      "schedule": "0 19 * * 0",
-      "enabled": true,
-      "agent": "google-ads-manager",
-      "prompt": "Weekly performance report. Load ALL memory tiers (core.md + working.md + long-term.md). Compile this week's daily metric snapshots from working.md into weekly totals: impressions, clicks, CTR, conversions, spend, CPC, CPA. Compare against previous week from long-term.md. Identify top/bottom performers if multiple campaigns exist. Review conversion health across all 5 actions. Check Google tag hit growth since last week. Summarize exploration progress (pages explored, new capabilities learned). Generate recommendations based on trends. Send comprehensive weekly report to {{PARENT_1}} via Telegram ({{TELEGRAM_PARENT_1}}, speak param). Promote weekly summary to long-term.md. Reset working.md weekly metrics section. Update events.log."
-    },
-    {
-      "id": "content-blitz-hourly",
-      "schedule": "0 * * * *",
-      "enabled": true,
-      "agent": "content-blitz",
-      "prompt": "CONTENT BLITZ — Hourly State Machine Cycle. Load memory tiers (core.md + working.md). Read the spec at data/specs/content-blitz-v1.md. Compute current CT time and determine campaign day (May 14=Day1 through May 28=Day14). If outside campaign window, disable this cron job and exit. STATE MACHINE: Read pipeline_state from working.md ## Today section. Execute the action for that state, advance to the next state on success, stay on failure (increment retry_count). If retry_count >= 3, alert {{PARENT_1}} and stay. STATES: idle: Pick next idea. (1) Check {{PARENT_1}} idea queue in working.md. (2) Scan {{GITHUB_USERNAME}} repos. (3) Fall back to calendar theme. Set pipeline_state = step1_idea. | step1_idea: Research topic. Write baton fields (today_date, today_day_number, today_theme, today_topic, today_angle, today_outline, today_talking_points, today_examples). Set step1_complete = true, pipeline_state = step2_newsletter. Send morning kickoff to {{PARENT_1}}. | step2_newsletter: Dispatch blog-writer in NEWSLETTER mode (2000+ words, premium deep-dive, brand safety, no employer names). After PR created, set pipeline_state = step2_review. | step2_review: Dispatch code-review on the PR. Quality gate: banned patterns (TODO, TBD, V2, coming soon, placeholder, lorem ipsum), completeness, CTAs, brand safety. If fails, remediate on same branch (max 2 cycles). On pass: set pipeline_state = step2_merge. | step2_merge: Use dev_merge_pr to merge newsletter PR (squash, delete branch). Record today_newsletter_merged = true, step2_complete = true. Set pipeline_state = step3_blueprint. | step3_blueprint: Dispatch blueprint-manager. Fully written content, no stubs. Set pipeline_state = step3_review. | step3_review: Quality gate review + remediation. On pass: set pipeline_state = step3_merge. | step3_merge: Merge blueprint PR via dev_merge_pr. Record today_blueprint_merged = true, step3_complete = true. Set pipeline_state = step4_blog. | step4_blog: Dispatch blog-writer in TEASER mode (800-1200 words, 3 newsletter CTAs, blueprint link). Set pipeline_state = step4_review. | step4_review: Quality gate review + remediation. On pass: set pipeline_state = step4_merge. | step4_merge: Merge blog PR via dev_merge_pr. Record today_blog_merged = true, step4_complete = true. Set pipeline_state = step5_social. | step5_social: Dispatch content-creative (2-4 social posts with images, all link to blog). Set pipeline_state = step5_review. | step5_review: Quality gate review. Schedule posts after pass. Record step5_complete = true. Set pipeline_state = metrics. | metrics: Dispatch content-analytics for performance data. Archive today baton to Day History. Reset Today for next idea. Send daily report to {{PARENT_1}} ({{TELEGRAM_PARENT_1}}, speak param). Set pipeline_state = idle. AFTER executing: Update pipeline_state and retry_count in working.md. Append action to events.log. CRITICAL: Use dev_merge_pr for all merges. Brand safety check on ALL content. NEVER mention previous employer by name."
+      "agent": "second-brain-manager",
+      "prompt": "\nDelivery rule: scheduled assistant output is not auto-forwarded. If there is useful output, send it to Telegram chat `507960755` with `telegram_send_message`. If there is no material update or only healthy/no-news status, return exactly `[SILENT]` and do not send Telegram.\n\nDaily second-brain health audit for Tony. This is a quiet health checker for `/home/tonyxu/brain`, GBrain, and the main personal information loops. Healthy result must be exactly `[SILENT]`.\n\nCanonical contract:\n- Brain repo `/home/tonyxu/brain` is the human-readable source of truth.\n- GBrain is the searchable/indexed memory layer.\n- Never read/import/embed/share `notes/records/secrets/`.\n- Company Slack/internal comms are off-limits for personal automation.\n- Do not delete files, change credentials, change delivery destinations, or publish/send anything.\n\nRequired checks:\n1. `cd /home/tonyxu/brain`.\n2. Run `gbrain stats`. If `Embedded < Chunks`, run `gbrain embed --stale` once, then run `gbrain stats` again. Report only if it still fails or drift remains material.\n3. Run `python3 scripts/verify_daily_activity_coverage.py --json`. Report if it fails, if expected labels are missing, or if there are new severe warnings. Known non-blocking warning: existing zero-byte raw artifacts may be reported; do not delete them.\n4. Inspect `/home/tonyxu/brain/state/activity_collector_state.json` and `/home/tonyxu/.local/state/copilot-home-assistant/email_butler_ops_latest.json` if present. Report only stale/failing collector state, not routine success.\n5. Check `notes/unsorted/_promotion_queue.md` age/size lightly. If it is growing or has old unresolved items, report a concise backlog recommendation; do not auto-edit it.\n6. Check git status for `/home/tonyxu/brain`. Report if there are uncommitted changes that appear sensitive or inexplicable. Generated collector/source updates are okay but should be mentioned only if unusually large.\n\nOutput contract:\n- If all checks are healthy or only routine generated changes exist: `[SILENT]`\n- If issues exist: concise Chinese Telegram message, first line `**Second Brain Health** — <main issue>`, then max 5 bullets with exact failing command/state and recommended action.\n- Redact tokens, credentials, cookies, database URLs, OAuth material, and message IDs.\n- Do not schedule other cron jobs."
     }
   ]
 }

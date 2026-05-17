@@ -12,6 +12,7 @@
  * (when using the standalone bridge service instead).
  */
 import { readFileSync, existsSync, writeFileSync, readdirSync } from "node:fs";
+import { execFile } from "node:child_process";
 import { resolve, join, basename, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { joinSession } from "@github/copilot-sdk/extension";
@@ -350,6 +351,30 @@ function stopTypingIndicator() {
   }
 }
 
+function scheduleServiceRestart() {
+  const serviceName = process.env.COPILOT_HOME_ASSISTANT_SERVICE || "copilot-home-assistant.service";
+  const args = [
+    "--user",
+    "--unit=copilot-home-assistant-restart",
+    "--on-active=2",
+    "/usr/bin/systemctl",
+    "--user",
+    "restart",
+    serviceName,
+  ];
+
+  return new Promise((resolve, reject) => {
+    execFile("/usr/bin/systemd-run", args, { timeout: 5000 }, (err, stdout, stderr) => {
+      if (err) {
+        err.message = stderr?.trim() || err.message;
+        reject(err);
+        return;
+      }
+      resolve(stdout?.trim() || "restart scheduled");
+    });
+  });
+}
+
 async function pollLoop(session) {
   running = true;
 
@@ -442,7 +467,7 @@ async function pollLoop(session) {
             chatId,
             `Connected! Your chat ID is: ${chatId}\n\n` +
               `Send any message and it will be forwarded to your {{PRODUCT}} CLI session.\n\n` +
-              `Commands:\n/status — check bridge status\n/help — show this message`
+              `Commands:\n/status — check bridge status\n/restart — restart the home assistant service\n/help — show this message`
           );
           continue;
         }
@@ -458,13 +483,31 @@ async function pollLoop(session) {
           continue;
         }
 
+        if (msg.text === "/restart") {
+          await sendTelegramMessage(
+            chatId,
+            "Restart scheduled. The assistant should be back in a few seconds."
+          );
+          try {
+            const result = await scheduleServiceRestart();
+            await session.log(`[Telegram] Service restart scheduled: ${result}`);
+          } catch (err) {
+            await session.log(`[Telegram] Failed to schedule restart: ${err.message}`, { level: "warning" });
+            await sendTelegramMessage(
+              chatId,
+              `Restart failed to schedule: ${err.message}`
+            );
+          }
+          continue;
+        }
+
         if (msg.text === "/help") {
           await sendTelegramMessage(
             chatId,
             `Telegram <-> Copilot CLI Bridge\n\n` +
               `Send any text message and it will be forwarded to your active Copilot CLI session as a user prompt.\n\n` +
               `The assistant's response will be sent back here automatically.\n\n` +
-              `Commands:\n/start — welcome message & chat ID\n/status — bridge status\n/help — this message`
+              `Commands:\n/start — welcome message & chat ID\n/status — bridge status\n/restart — restart the home assistant service\n/help — this message`
           );
           continue;
         }
@@ -939,10 +982,9 @@ const session = await joinSession({
           speak: {
             type: "string",
             description:
-              "Short TTS text for Tasker integration (1-2 sentences, no emojis/markdown). " +
-              "When provided, 'SPEAK: [text]' is prepended to the message so it appears in notification previews. " +
-              "ALWAYS use this when sending to {{PARENT_1}} ({{TELEGRAM_PARENT_1}}). " +
-              "Do NOT use for {{PARENT_2}} ({{TELEGRAM_PARENT_2}}) — she doesn't use Tasker TTS.",
+              "DEPRECATED — DO NOT USE. Tony disabled TTS on 2026-05-16. " +
+              "Never pass this parameter for any recipient. Never prepend 'SPEAK:' to message text manually. " +
+              "This field is retained only for backward compatibility and is ignored at runtime.",
           },
         },
         required: ["message"],
@@ -964,11 +1006,8 @@ const session = await joinSession({
           };
         }
         try {
-          // Compose final message: prepend SPEAK: line if speak parameter provided
-          let finalMessage = args.message;
-          if (args.speak && args.speak.trim()) {
-            finalMessage = `SPEAK: ${args.speak.trim()}\n\n${args.message}`;
-          }
+          // SPEAK: prefix is permanently disabled (Tony, 2026-05-16). Ignore any speak arg.
+          const finalMessage = args.message;
           await sendTelegramMessage(targetChat, finalMessage);
           return `Message sent to Telegram chat ${targetChat}`;
         } catch (err) {
