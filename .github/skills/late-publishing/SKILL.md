@@ -47,7 +47,7 @@ late_create_post(
   platforms: '[{"platform":"instagram","accountId":"{{INSTAGRAM_ACCOUNT_ID}}"},{"platform":"linkedin","accountId":"{{LINKEDIN_ACCOUNT_ID}}"},{"platform":"tiktok","accountId":"{{TIKTOK_ACCOUNT_ID}}"},{"platform":"twitter","accountId":"{{TWITTER_ACCOUNT_ID}}"},{"platform":"youtube","accountId":"{{YOUTUBE_ACCOUNT_ID}}"}]',
   media_items: '[{"type":"video","url":"PUBLIC_URL"}]',
   queue_id: "{{LATE_PROFILE_ID}}",
-  timezone: "{{TIMEZONE}}"
+  timezone: "America/Los_Angeles"
 )
 ```
 

@@ -104,7 +104,7 @@ You know everyone's rhythms. You know {{PARENT_1}}'s work schedule, {{PARENT_2}}
 
 ### Event Planning
 - Birthday parties, holidays, family gatherings
-- Guest lists, venue booking, food coordination with `nutrition-chef`
+- Guest lists, venue booking, food coordination with
 - Gift tracking and reminders
 - RSVP management
 
@@ -166,11 +166,8 @@ Examples:
 
 ## Integration Points
 
-- **`health-coach`**: Medical appointment scheduling, babysitter needs for appointments, pregnancy appointment logistics
 - **`finance-manager`**: Activity costs, babysitter expenses, event budgets
 - **`home-manager`**: Contractor visit scheduling (someone needs to be home), project timelines
-- **`nutrition-chef`**: Meal timing around activities, event food coordination, restaurant reservations
-- **`dog-parent`**: Pet sitter needs when family is away, vet appointment scheduling
 
 ---
 

@@ -1,0 +1,55 @@
+{
+  "_schema_notes": "Single source of truth for family identities. Keys are stable user identifiers used across all agents/skills/docs. To activate a user, fill their entry and flip active=true. Telegram chat_id is the routing key for telegram_send_message.",
+  "users": {
+    "tony": {
+      "active": true,
+      "display_name": "Tony",
+      "full_name": "Tony Xu",
+      "role": "primary",
+      "telegram_chat_id": "507960755",
+      "email": "yihan.xu@gmail.com",
+      "language_preference": "zh-CN",
+      "timezone": "America/Los_Angeles"
+    },
+    "tony_spouse": {
+      "active": false,
+      "display_name": null,
+      "full_name": null,
+      "role": "spouse",
+      "telegram_chat_id": null,
+      "email": null,
+      "language_preference": null,
+      "timezone": "America/Los_Angeles"
+    },
+    "tony_father": {
+      "active": false,
+      "display_name": null,
+      "full_name": null,
+      "role": "elder_parent",
+      "telegram_chat_id": null,
+      "email": null,
+      "language_preference": null,
+      "timezone": null
+    },
+    "tony_mother": {
+      "active": false,
+      "display_name": null,
+      "full_name": null,
+      "role": "elder_parent",
+      "telegram_chat_id": null,
+      "email": null,
+      "language_preference": null,
+      "timezone": null
+    }
+  },
+  "groups": {
+    "primary_only": ["tony"],
+    "couple": ["tony", "tony_spouse"],
+    "elders": ["tony_father", "tony_mother"],
+    "all": ["tony", "tony_spouse", "tony_father", "tony_mother"]
+  },
+  "data_boundaries": {
+    "shared": ["bills", "calendar", "home_maintenance", "shopping_list", "family_events"],
+    "private": ["health", "personal_tasks", "email", "personal_notes"]
+  }
+}

@@ -150,11 +150,8 @@ Examples:
 
 ## Integration Points
 
-- **`health-coach`**: Flag medical bills, HSA/FSA reminders, insurance premium dates
 - **`home-manager`**: Home repair costs, maintenance budget tracking, nursery build-out costs
-- **`nutrition-chef`**: Grocery budget coordination, flag when food spending trends high
 - **`family-coordinator`**: Activity costs (sports, classes), babysitter expenses
-- **`dog-parent`**: Pet expense tracking (vet bills, food costs)
 
 ---
 

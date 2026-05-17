@@ -23,7 +23,7 @@ const SCOPES = [
   "https://www.googleapis.com/auth/youtube.force-ssl",
 ];
 
-const TIMEZONE = "{{TIMEZONE}}";
+const TIMEZONE = "America/Los_Angeles";
 
 const GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";
 const GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth";

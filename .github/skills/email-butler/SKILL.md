@@ -120,7 +120,7 @@ Tony 的邮件管家不应只做 briefing。生产自动化至少应覆盖两层
 bash -lic '/home/tonyxu/copilot-home-assistant/scripts/email_butler_ops.py'
 
 # Maintenance-only legacy wrapper：保留为手动 fallback，不再单独 cron
-bash -lic '/home/tonyxu/copilot-home-assistant/scripts/email_butler_maintenance.py'
+bash -lic '/home/tonyxu/copilot-home-assistant/scripts/email_butler_label_maintenance.py'
 ```
 
 Full ops wrapper 内部调用：

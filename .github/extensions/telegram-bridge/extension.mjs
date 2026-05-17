@@ -909,7 +909,7 @@ const session = await joinSession({
       // Get current local time in Central timezone
       const now = new Date();
       const localTime = now.toLocaleString("en-US", {
-        timeZone: "{{TIMEZONE}}",
+        timeZone: "America/Los_Angeles",
         weekday: "long",
         year: "numeric",
         month: "long",

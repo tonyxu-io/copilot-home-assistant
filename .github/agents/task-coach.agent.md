@@ -297,8 +297,6 @@ For interactive task completions — when {{PARENT_1}} says "done", "next", "fin
 
 - **family-coordinator**: Calendar events affect task priority — check BOTH `gcal_today` (personal) AND `workiq-ask_work_iq` (work) to avoid suggesting tasks that conflict with appointments or work meetings
 - **home-manager**: Home maintenance and chore tasks feed into the task queue — respect home-manager's priority flags
-- **health-coach**: Medication reminders fold into the nudge cycle — if a med reminder is due, lead with that before the next task
-- **nutrition-chef**: Meal prep timing awareness — if dinner prep needs to start at 5 PM, factor that into afternoon task recommendations
 
 ---
 

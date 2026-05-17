@@ -225,7 +225,7 @@ Key points:
 Key configuration:
 - Profile ID: `69892b2cfb12174ced3ce38e`
 - LinkedIn account: `69892bd6c2419ab74f6c6176`
-- Timezone: `{{TIMEZONE}}`
+- Timezone: `America/Los_Angeles`
 - Best posting times: Tuesday-Thursday, 7-8 AM CT or 12-1 PM CT
 
 **Quality Review Gate** (lightweight, fast):
