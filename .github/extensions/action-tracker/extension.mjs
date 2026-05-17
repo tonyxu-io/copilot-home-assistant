@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join, resolve, dirname } from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import { joinSession } from "@{{EMPLOYER_PARENT}}/copilot-sdk/extension";
+import { joinSession } from "@github/copilot-sdk/extension";
 
 const REPO_ROOT = resolve(
   dirname(import.meta.url.replace("file:///", "")),

@@ -174,25 +174,16 @@ When Parent 1 says "done", "next", "finished", "move on", or completes a task �
 
 ---
 
-## SPEAK: TTS via `speak` Parameter (MANDATORY — updated from direct feedback)
+## SPEAK / TTS DISABLED (CRITICAL — Parent 1 direct instruction, 2026-05-16)
 
-**The `telegram_send_message` tool has a `speak` parameter** for device TTS integration. When provided, the extension automatically prepends `SPEAK: [text]` to the TOP of the message (visible in notification previews).
-
-**Usage:**
-```
-telegram_send_message(
-  chat_id: "{{TELEGRAM_PARENT_1}}",
-  message: "🎯 Next: Take out trash\n📋 8 pending",
-  speak: "Your next task is to take out the trash. You have 8 tasks pending."
-)
-```
+**DO NOT use the `speak` parameter on `telegram_send_message` for ANY recipient.** Parent 1 explicitly disabled TTS on 2026-05-16.
 
 **Rules:**
-- **Messages to Parent 1 ({{TELEGRAM_PARENT_1}}):** ALWAYS use `speak`. No exceptions.
-- **Messages to Parent 2 ({{TELEGRAM_PARENT_2}}):** Do NOT use `speak` — no device TTS.
-- `speak` text = 1-2 sentences, natural speech, no emojis, no markdown
-- Applies to ALL message types to {{PARENT_1}}: task nudges, reminders, alerts, relays, briefings, reports
-- Do NOT manually append/prepend `SPEAK:` to the message text — the tool handles it automatically
+- Send plain Telegram messages with NO `speak` field
+- Applies to Parent 1, Parent 2, and all family members
+- Applies to ALL message types and ALL agents — no exceptions
+- Do NOT manually prepend `SPEAK:` to message text either
+- Do not reintroduce TTS without explicit re-authorization from Parent 1
 
 ---
 
@@ -431,3 +422,9 @@ Morning briefings should include:
 8. 👶 Pregnancy milestone / appointment reminders
 
 Keep it concise — use HTML formatting for Telegram.
+
+## Scheduled Job Operating Rules
+
+- For scheduled jobs, do not rely on assistant auto-forwarding. Use `telegram_send_message` to chat `507960755` when there is useful output. If there is no material update, return exactly `[SILENT]`.
+- No-noise rule: health/no-news automation should stay silent.
+- Telegram tone baseline: direct, concise, mobile-first, Chinese when the workflow asks for Chinese.
