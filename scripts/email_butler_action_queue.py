@@ -12,6 +12,7 @@ import json
 import os
 import re
 import subprocess
+import sys
 import time
 from pathlib import Path
 from typing import Any, Callable
@@ -22,8 +23,30 @@ STATE_PATH = Path.home() / ".local" / "state" / "copilot-home-assistant" / "emai
 REDACT_RE = re.compile(r"(ya29\.[A-Za-z0-9._-]+|Bearer\s+[^\s]+|gh[pousr]_[A-Za-z0-9_]+|[A-Za-z0-9_=-]{120,})")
 
 QUERY = 'newer_than:14d (label:"Action Needed" OR label:Recruiting OR "open to a quick call" OR "quick call" OR "would love to tell you more" OR "please sign" OR "action required" OR "requires your attention" OR "final notice" OR "verify your" OR "document to sign" OR "complete your" OR "payment failed" OR "failed payment" OR "tax deadline" OR "security alert" OR "new login" OR "new sign-in" OR "account locked" OR "container stopped unexpectedly" OR "backup failed" OR "certificate expiring") -category:promotions -category:social -category:forums'
-MAX_RESULTS = 25
+MAX_RESULTS = 15
 MAX_DRAFTS = 3
+
+# Wall-clock budget. The wrapper (email_butler_ops.py) hard-kills this
+# subprocess at 600s, so we leave ourselves a comfortable margin to emit a
+# well-formed partial-result JSON instead of being SIGKILLed mid-output.
+SOFT_DEADLINE_S = 480
+GWS_TIMEOUT_S = 45  # Gmail API HTTP calls; anything past this is a hang.
+LLM_TIMEOUT_S = 45  # Copilot CLI for short structured replies.
+
+_START_TIME = time.time()
+
+
+def _elapsed() -> float:
+    return time.time() - _START_TIME
+
+
+def log(msg: str) -> None:
+    """Emit a timestamped progress line to stderr for forensic timeout debugging."""
+    print(f"[aq +{_elapsed():6.1f}s] {msg}", file=sys.stderr, flush=True)
+
+
+def soft_deadline_hit() -> bool:
+    return _elapsed() >= SOFT_DEADLINE_S
 
 IGNORE_FROM = re.compile(r"(noreply@medium|newsletter|substack|linkedin job|indeed|ziprecruiter)", re.I)
 LOW_SIGNAL_SUBJECT = re.compile(r"(sale|discount|webinar|digest|newsletter|recommended|promotion|completed a scheduled task|success|succeeded|has recovered|resolved)", re.I)
@@ -64,7 +87,7 @@ def retry_call(fn: Callable[[], Any], attempts: int = 3, base_delay: float = 1.5
     raise last_exc
 
 
-def run_cmd(cmd: list[str], timeout: int = 180) -> str:
+def run_cmd(cmd: list[str], timeout: int = GWS_TIMEOUT_S) -> str:
     env = os.environ.copy()
     env["PATH"] = "/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:" + env.get("PATH", "")
     proc = subprocess.run(cmd, text=True, capture_output=True, timeout=timeout, env=env)
@@ -76,7 +99,7 @@ def run_cmd(cmd: list[str], timeout: int = 180) -> str:
 
 
 def run_gws(args: list[str]) -> Any:
-    return decode_jsonish(run_cmd([GWS, *args], timeout=180))
+    return decode_jsonish(run_cmd([GWS, *args], timeout=GWS_TIMEOUT_S))
 
 
 def email_from_header(value: Any) -> str:
@@ -95,13 +118,16 @@ def header_value(message: dict[str, Any], name: str) -> str:
     return ""
 
 
-def newest_thread_message(mid: str) -> dict[str, Any] | None:
+def newest_thread_message(mid: str, raw: dict[str, Any] | None = None) -> dict[str, Any] | None:
     thread_id = None
-    try:
-        raw = read_message(mid)
+    if isinstance(raw, dict):
         thread_id = raw.get("thread_id") or raw.get("threadId")
-    except Exception:
-        thread_id = None
+    if not thread_id:
+        try:
+            fetched = read_message(mid)
+            thread_id = fetched.get("thread_id") or fetched.get("threadId")
+        except Exception:
+            thread_id = None
     if not thread_id:
         thread_id = mid
     data = run_gws([
@@ -120,9 +146,9 @@ def newest_thread_message(mid: str) -> dict[str, Any] | None:
     return max(messages, key=lambda x: int(x.get("internalDate") or 0))
 
 
-def already_handled_or_ack(mid: str, body: str = "") -> bool:
+def already_handled_or_ack(mid: str, body: str = "", raw: dict[str, Any] | None = None) -> bool:
     try:
-        newest = newest_thread_message(mid)
+        newest = newest_thread_message(mid, raw=raw)
     except Exception:
         return False
     if not newest:
@@ -232,7 +258,7 @@ def llm_json(prompt: str) -> Any:
         "--deny-tool=edit", "--deny-tool=create", "--deny-tool=bash",
         "--deny-tool=write_bash", "--deny-tool=read_bash",
         "--disable-builtin-mcps",
-    ], timeout=90)
+    ], timeout=LLM_TIMEOUT_S)
     return decode_jsonish(out)
 
 
@@ -294,15 +320,32 @@ def main() -> int:
         except Exception:
             pass
     seen = set(state.get("seen", []))
+    log("triage:start")
     msgs = retry_call(triage)
+    log(f"triage:done candidates={len(msgs)}")
     selected = msgs if args.include_seen else [m for m in msgs if m["id"] not in seen]
+    log(f"selected={len(selected)} (after seen filter)")
 
     items: list[dict[str, Any]] = []
     draft_count = 0
+    deadline_hit = False
+    processed = 0
     for m in selected[:8]:
-        raw = retry_call(lambda mid=m["id"]: read_message(mid), attempts=2, base_delay=1)
+        if soft_deadline_hit():
+            deadline_hit = True
+            log(f"soft-deadline reached after {processed}/{len(selected[:8])} items; emitting partial result")
+            break
+        processed += 1
+        mid = m["id"]
+        log(f"item[{processed}] read id={mid}")
+        try:
+            raw = retry_call(lambda mid=mid: read_message(mid), attempts=2, base_delay=1)
+        except Exception as exc:
+            log(f"item[{processed}] read failed: {redact(str(exc))[:200]}")
+            continue
         body = raw.get("body_text") or raw.get("snippet") or ""
-        if email_from_header(raw.get("from")) in SELF_EMAILS or already_handled_or_ack(m["id"], body):
+        if email_from_header(raw.get("from")) in SELF_EMAILS or already_handled_or_ack(mid, body, raw=raw):
+            log(f"item[{processed}] filtered (self/ack/handled)")
             continue
         m["kind"] = classify(m.get("subject", ""), m.get("from", ""), body)
         message_for_draft = {
@@ -311,12 +354,18 @@ def main() -> int:
             "body_text": body,
         }
         draft = None
-        if draft_count < max(0, args.max_drafts) and is_reply_worthy(m["kind"], m.get("from", ""), m.get("subject", ""), body):
+        if (
+            draft_count < max(0, args.max_drafts)
+            and not soft_deadline_hit()
+            and is_reply_worthy(m["kind"], m.get("from", ""), m.get("subject", ""), body)
+        ):
             try:
+                log(f"item[{processed}] llm draft kind={m['kind']}")
                 draft = model_draft_reply(message_for_draft, m["kind"])
                 if draft:
                     draft_count += 1
-            except Exception:
+            except Exception as exc:
+                log(f"item[{processed}] llm draft failed: {redact(str(exc))[:200]}")
                 draft = None
         items.append(public_item(m, draft))
 
@@ -341,7 +390,10 @@ def main() -> int:
         "draft_count": draft_count,
         "mode": "read-only-action-queue-with-draft-suggestions",
         "safety": "no send/reply/forward/archive/delete/mark-read",
+        "partial": deadline_hit,
+        "elapsed_s": round(_elapsed(), 1),
     }, ensure_ascii=False))
+    log(f"done items={len(items)} drafts={draft_count} partial={deadline_hit} elapsed={_elapsed():.1f}s")
     return 0
 
 
