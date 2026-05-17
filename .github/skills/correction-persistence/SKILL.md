@@ -50,11 +50,11 @@ Edit `data/standing-orders.md` — add a new section under the appropriate headi
 - Correct pattern (what TO do)
 - Scope (which agents/contexts this applies to)
 
-### Step 4: Add to Copilot Instructions
-Edit `.{{EMPLOYER_PARENT}}/copilot-instructions.md` under "Learned Behaviors" section with:
-- Same format as standing orders
-- Include date learned
-- Be concise — copilot-instructions is read by every session
+### Step 4: Add to Copilot Instructions (only if main-session-relevant)
+The `Learned Behaviors` section was retired in the May 2026 trim — there is no longer a dated-entry log in `copilot-instructions.md`. Instead:
+- If the rule affects **main-session behavior** (decision posture, communication style, agent topology, etc.), inline a short summary into the relevant existing section of `.github/copilot-instructions.md` and link to the canonical entry in `standing-orders.md`.
+- If the rule is purely a cron/heartbeat/scheduled-run rule, standing-orders.md is sufficient — skip copilot-instructions.
+- If a rule MUST reach cron-launched agents, also replicate it into the relevant agent file in `.github/agents/` or directly into the cron prompt in `cron.json`, because `cron-scheduler` does not auto-inject standing-orders.
 
 ### Step 5: Confirm Persistence
 Report back: "✅ Persisted across all 3 layers: store_memory, standing-orders.md, copilot-instructions.md. This will never happen again."
@@ -79,7 +79,7 @@ Report back: "✅ Persisted across all 3 layers: store_memory, standing-orders.m
 
 Before adding a new rule, check if a similar one already exists:
 1. `grep` standing-orders.md for related keywords
-2. Check copilot-instructions.md "Learned Behaviors" section
+2. Check the relevant section of `copilot-instructions.md` for an inline summary
 3. If a related rule exists, UPDATE it (don't duplicate)
 4. If the new correction OVERRIDES an old rule, mark the old one as superseded
 
