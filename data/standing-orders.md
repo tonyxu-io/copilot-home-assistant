@@ -411,10 +411,22 @@ If any family member publicly represents a company, employer, or product, define
 - `store_memory` (Copilot built-in) is still allowed for ephemeral cross-session facts that are agent-internal. **gbrain is preferred for anything Tony would want to retrieve later.**
 
 **Safety rails (also hardcoded in the extension):**
-- NEVER write to `notes/records/private/**`, `notes/records/secrets/**`, or any slug containing `secrets|credentials|cookies|tokens|api_keys|oauth|.env|passwords`. The extension refuses these; do not try to bypass.
-- Slugs must be brain-relative (no leading `/`, no `..`).
+- `gbrain` is **trusted memory** (Tony, 2026-05-17). Agents MAY store credentials, tokens, API keys, cookies, OAuth refresh tokens, and other secrets in gbrain when Tony asks them to — the brain lives locally and Tony explicitly wants these retrievable from his phone via gbrain.
+- The ONE remaining off-limits area is `notes/records/private/**` — Tony's reserved isolation directory. The extension refuses writes there.
+- Slugs must be brain-relative (no leading `/`, no `..`). 512KB max per page.
 - `gbrain delete` is intentionally NOT exposed. The bridge is read + put only.
 - 30s default per-call timeout, 120s cap.
+
+**Other secret/credential surfaces are NOT relaxed:**
+- ❌ `store_memory` (Copilot built-in) — still **forbidden** for secrets. That call ships content to Copilot/GitHub servers; it is a remote memory layer, not local-and-trusted like gbrain.
+- ❌ git commits — still never commit credentials. The brain repo is separate from `copilot-home-assistant`; secrets live only in gbrain pages, not in checked-in code.
+- ❌ Telegram messages — don't paste raw secrets into chat unless Tony explicitly asks; reference the gbrain slug instead.
+
+**Recommended slug conventions for credential pages** (so agents can find them later via `gbrain_query`):
+- `notes/secrets/<service>` — e.g. `notes/secrets/stripe-test`, `notes/secrets/aws-prod`
+- `credentials/<service>` — top-level, for things Tony wants immediate `gbrain query "credentials"` recall on
+- `notes/work/secrets/<service>` — work-scoped credentials
+Use clear titles and include `service`, `account`, `created`, and rotation/expiry hints in frontmatter.
 
 **Canonical skill:** `.github/skills/gbrain-operations/SKILL.md` (now includes `gbrain_*` tool usage as the preferred surface).
 

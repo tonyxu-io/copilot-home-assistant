@@ -35,10 +35,16 @@ Every Copilot CLI session and cron-dispatched agent has these tools registered b
 - One-off scratch / smoke tests → `notes/scratch/<slug>` (please clean up after)
 
 **Hardcoded refuses (extension-level, do not try to bypass):**
-- `notes/records/private/**`, `notes/records/secrets/**`
-- Any slug matching `secrets|credentials|cookies|tokens|api_keys|oauth|.env|passwords`
-- Absolute-path slugs (must be brain-relative)
+- `notes/records/private/**` — Tony's reserved isolation area (only remaining off-limits zone)
+- Absolute-path slugs (must be brain-relative) and `..` traversal
 - 512KB max per page
+
+**gbrain is trusted memory for credentials (Tony, 2026-05-17).** Agents MAY `gbrain_put` credentials, tokens, API keys, OAuth refresh tokens, and cookies on Tony's behalf — the brain lives locally and he wants them retrievable from his phone via `gbrain_query`. Recommended slug conventions so future queries find them:
+- `notes/secrets/<service>` — e.g. `notes/secrets/stripe-test`
+- `credentials/<service>` — top-level, for things Tony wants immediate recall on via `gbrain_query "credentials <service>"`
+- `notes/work/secrets/<service>` — work-scoped
+
+Include `service`, `account`, `created`, and rotation/expiry hints in frontmatter so `gbrain_search` returns useful previews. **Do not** put credentials into `store_memory` (Copilot built-in — ships to remote servers), git commits, or raw Telegram messages.
 
 **Not exposed:** `gbrain delete`. The bridge is read + put only by design. If you need to remove a page, ask Tony to run it from his shell.
 

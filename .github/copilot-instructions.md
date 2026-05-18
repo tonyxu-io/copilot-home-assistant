@@ -126,7 +126,7 @@ Sub-agents load `data/constitution.md` for core principles, communication rules,
 
 - **Read before recommending.** Briefings, task-coach, content-editor, finance-manager, and any agent producing a recommendation for Tony SHOULD `gbrain_query` for relevant context BEFORE generating output.
 - **Write substantive new insights.** After daily syntheses or curated content, `gbrain_put` so Tony can retrieve it later from his phone. Prefer `notes/memo/<date>`, `notes/work/memo/<date>`, `notes/knowledge/.`, `people/.`, `projects/.`. `store_memory` is still fine for ephemeral agent-internal facts; gbrain is preferred for anything Tony would want to find again.
-- **Safety (hardcoded in the extension):** NEVER write to `notes/records/private/**`, `notes/records/secrets/**`, or any slug containing `secrets|credentials|cookies|tokens|api_keys|oauth|.env|passwords`. Slugs must be brain-relative. `gbrain delete` is intentionally NOT exposed.
+- **Safety (hardcoded in the extension):** gbrain is **trusted memory** (Tony, 2026-05-17) — agents MAY persist credentials, tokens, API keys, OAuth refresh tokens, and cookies in gbrain on Tony's behalf. The ONLY off-limits area is `notes/records/private/**` (Tony's reserved isolation directory). Slugs must be brain-relative. `gbrain delete` is intentionally NOT exposed. Other secret surfaces stay locked down: ❌ `store_memory` (ships to Copilot/GitHub servers — never put secrets there), ❌ git commits, ❌ raw secrets in Telegram unless Tony asks.
 - Canonical: `data/standing-orders.md` → External Memory — gbrain; skill: `.github/skills/gbrain-operations`.
 
 ## Skills-First Development

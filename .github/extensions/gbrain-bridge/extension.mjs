@@ -13,9 +13,11 @@
  *   - gbrain_list   : list pages by type/tag
  *
  * Safety rails (hardcoded, non-negotiable):
- *   - Refuses to write any slug under notes/records/private, notes/records/secrets,
- *     or anything containing secrets|credentials|cookies|tokens|api_keys|oauth|.env
+ *   - Refuses to write any slug under notes/records/private (Tony's reserved
+ *     isolation area). Per Tony 2026-05-17, gbrain itself is trusted memory
+ *     and may store credentials/tokens/api_keys — those are NOT blocked.
  *   - Refuses absolute-path slugs (must be brain-repo-relative)
+ *   - Refuses '..' traversal
  *   - Never spawns a shell — uses `spawn` with array argv only
  *   - 30s default per-command timeout (override via `timeout_ms`, capped at 120s)
  *   - `delete` is never exposed
@@ -37,17 +39,12 @@ const MAX_TIMEOUT_MS = 120_000;
 const MAX_PUT_BYTES = 512 * 1024; // 512KB per page is plenty
 
 // Hardcoded blocklist — slugs matching any of these are refused for writes.
+// Updated 2026-05-17 per Tony's instruction: gbrain is trusted memory and may
+// store credentials/tokens/api_keys/secrets. Only `notes/records/private/**`
+// remains off-limits (Tony's reserved isolation area), plus basic path-safety
+// rails (absolute paths, '..' traversal).
 const SLUG_BLOCK_PATTERNS = [
   /^notes\/records\/private(\/|$)/i,
-  /^notes\/records\/secrets(\/|$)/i,
-  /(^|\/|-|_)secrets?(\/|-|_|$)/i,
-  /(^|\/|-|_)credentials?(\/|-|_|$)/i,
-  /(^|\/|-|_)cookies?(\/|-|_|$)/i,
-  /(^|\/|-|_)tokens?(\/|-|_|$)/i,
-  /(^|\/|-|_)api[-_]?keys?(\/|-|_|$)/i,
-  /(^|\/|-|_)oauth(\/|-|_|$)/i,
-  /(^|\/|-|_)\.env(\/|$)/i,
-  /(^|\/|-|_)passwords?(\/|-|_|$)/i,
 ];
 
 function isBlockedSlug(slug) {
@@ -56,7 +53,7 @@ function isBlockedSlug(slug) {
   if (slug.includes("..")) return "slug must not contain '..'";
   if (slug.length > 512) return "slug too long";
   for (const re of SLUG_BLOCK_PATTERNS) {
-    if (re.test(slug)) return `slug matches blocked pattern ${re} (private/secrets/credentials/tokens are off-limits)`;
+    if (re.test(slug)) return `slug matches blocked pattern ${re} (notes/records/private is Tony's reserved isolation area)`;
   }
   return null;
 }
@@ -265,7 +262,7 @@ async function handlePut(args) {
   const blocked = isBlockedSlug(slug);
   if (blocked) {
     return {
-      textResultForLlm: `gbrain_put REFUSED: ${blocked}. Private/secrets/credentials/tokens are off-limits for the bridge.`,
+      textResultForLlm: `gbrain_put REFUSED: ${blocked}. Only notes/records/private/** remains off-limits (Tony's reserved isolation area).`,
       resultType: "failure",
     };
   }
@@ -381,9 +378,10 @@ await joinSession({
       name: "gbrain_put",
       description:
         "Write/update a gbrain page with the given markdown content. Use to PERSIST substantive new " +
-        "insights, daily syntheses, or curated notes Tony will want to find later from his phone. " +
-        "REFUSES writes to notes/records/private, notes/records/secrets, or any slug containing " +
-        "secrets/credentials/cookies/tokens/api_keys/oauth/.env/passwords. Slug must be brain-relative.",
+        "insights, daily syntheses, curated notes, and (per Tony 2026-05-17) credentials/tokens/API-keys " +
+        "Tony will want to look up later from his phone. gbrain is trusted memory. " +
+        "ONLY refuses writes under notes/records/private/** (Tony's reserved isolation area). " +
+        "Slug must be brain-relative (no leading '/', no '..').",
       parameters: {
         type: "object",
         properties: {
