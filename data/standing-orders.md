@@ -385,6 +385,41 @@ If any family member publicly represents a company, employer, or product, define
 - ❌ Sending a sales qualification email to someone who only asked for article resources
 - ❌ Letting paid-traffic leads sit without same-day contact when your automation policy allows immediate follow-up
 
+---
+
+## External Memory — gbrain (PLATFORM DIRECTIVE — 2026-05-18)
+
+**gbrain is now wired into every Copilot CLI session** via the `gbrain-bridge` extension (`.github/extensions/gbrain-bridge/`). gbrain is Tony's personal knowledge brain at `/home/tonyxu/brain` — 34k+ pages indexed: memo, limemo (work memo), source exports (Gmail/Calendar digests), curated notes, projects, people. The assistant is no longer knowledge-isolated per session.
+
+**Five tools exposed to all agents and crons:**
+
+| Tool | Use for |
+|---|---|
+| `gbrain_query` | Hybrid search (RRF + expansion). **Default retrieval.** |
+| `gbrain_search` | Keyword tsvector search for exact phrases / proper nouns |
+| `gbrain_get` | Read full markdown of a page by slug |
+| `gbrain_put` | Persist a new page (optional embed) |
+| `gbrain_list` | Diagnostics — list pages by type/tag |
+
+**Default policy — read before recommending:**
+- Briefings, task-coach, content-editor, finance-manager, parenting-coach, and any agent producing a recommendation for Tony SHOULD `gbrain_query` for relevant context **before** producing output. Pull recent memo/limemo/digests/events for the topic at hand.
+- For email/topic triage, query gbrain on the sender, subject keywords, or company name to surface prior context before classifying.
+
+**Default policy — write substantive new insights:**
+- After producing daily syntheses, durable insights, or curated external content, agents SHOULD `gbrain_put` so Tony can find it later from his phone.
+- Prefer brain-curated paths: `notes/memo/<date>`, `notes/work/memo/<date>` (limemo), `notes/knowledge/.`, `people/.`, `projects/.`. See the `gbrain-operations` skill for routing.
+- `store_memory` (Copilot built-in) is still allowed for ephemeral cross-session facts that are agent-internal. **gbrain is preferred for anything Tony would want to retrieve later.**
+
+**Safety rails (also hardcoded in the extension):**
+- NEVER write to `notes/records/private/**`, `notes/records/secrets/**`, or any slug containing `secrets|credentials|cookies|tokens|api_keys|oauth|.env|passwords`. The extension refuses these; do not try to bypass.
+- Slugs must be brain-relative (no leading `/`, no `..`).
+- `gbrain delete` is intentionally NOT exposed. The bridge is read + put only.
+- 30s default per-call timeout, 120s cap.
+
+**Canonical skill:** `.github/skills/gbrain-operations/SKILL.md` (now includes `gbrain_*` tool usage as the preferred surface).
+
+---
+
 ## Skills-First Development (PLATFORM DIRECTIVE — from direct feedback)
 
 **Lean heavily on skills.** Any repeatable, bundleable capability MUST be extracted into a skill (`.github/skills/`). Agents should invoke skills rather than embedding capability logic inline. When building or improving anything, always ask: "Should this be a skill?"

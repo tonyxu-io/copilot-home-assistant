@@ -1,14 +1,53 @@
 ---
 name: gbrain-operations
-description: "Operate Tony's gbrain knowledge system: CLI recovery, imports, embeddings, project/people rebuilds, Postgres repair, memory-provider checks, and skillpack development."
-version: 1.0.0
+description: "Operate Tony's gbrain knowledge brain from Copilot CLI. Use gbrain_query/gbrain_search/gbrain_get/gbrain_put/gbrain_list (preferred) for routine read/write. Trigger phrases: gbrain, brain, external memory, recall, what did Tony say about, persist insight, save to brain, query brain. Also covers CLI recovery, imports, embeddings, project/people rebuilds, Postgres repair, memory-provider checks, and skillpack development."
+version: 1.1.0
 license: MIT
 metadata:
 ---
 
 # GBrain Operations
 
-Use this when working on Tony's gbrain system rather than a one-off note: repairing the CLI, importing or rebuilding local knowledge pages, changing embeddings/providers, debugging Postgres, checking external memory integration, or developing bundled gbrain skills/plugins.
+Use this when working with Tony's gbrain knowledge brain — either day-to-day retrieval/persistence from any agent (via the `gbrain_*` tools) or platform-level work on the gbrain system itself (CLI recovery, imports, embeddings, rebuilds, Postgres, skillpack dev).
+
+## Preferred tool surface — `gbrain_*` tools (gbrain-bridge extension)
+
+Every Copilot CLI session and cron-dispatched agent has these tools registered by `.github/extensions/gbrain-bridge/`:
+
+| Tool | Args | When to use |
+|---|---|---|
+| `gbrain_query` | `question`, `limit?` (default 8), `no_expand?`, `timeout_ms?` | **Default retrieval.** Hybrid search (RRF + multi-query expansion). Use for any "what does Tony know / think / have on X" question. |
+| `gbrain_search` | `query`, `limit?` (default 10) | Keyword (tsvector) search. Faster, more literal — use for exact phrases, slugs, proper nouns. |
+| `gbrain_get` | `slug` | Read the source of truth for a hit returned by query/search. |
+| `gbrain_put` | `slug`, `content`, `embed?` | Persist a substantive new insight, daily synthesis, or curated note. |
+| `gbrain_list` | `type?`, `tag?`, `limit?` | Diagnostics — find recently updated pages by type/tag. |
+
+**Recommended pattern:**
+1. `gbrain_query` with the question. Inspect 3-5 top hits.
+2. If a hit looks authoritative, `gbrain_get` it to read the full page.
+3. If you generated something durable, `gbrain_put` it (with `embed: true` if it should be retrievable by query within the same session).
+
+**Routing for `gbrain_put`:**
+- Tony's general personal memo → `notes/memo/<YYYY-MM-DD>` (or descriptive slug under `notes/memo/`)
+- Work memo (limemo) → `notes/work/memo/<YYYY-MM-DD>`
+- Curated external knowledge → `notes/knowledge/<topic>/<slug>` (for AI/video: `notes/knowledge/tech/ai/videos/`)
+- Durable entity facts → `people/<name>` or `projects/<slug>` (update existing pages with dated source notes when possible — see "Rewrite-on-ingest propagation" below)
+- One-off scratch / smoke tests → `notes/scratch/<slug>` (please clean up after)
+
+**Hardcoded refuses (extension-level, do not try to bypass):**
+- `notes/records/private/**`, `notes/records/secrets/**`
+- Any slug matching `secrets|credentials|cookies|tokens|api_keys|oauth|.env|passwords`
+- Absolute-path slugs (must be brain-relative)
+- 512KB max per page
+
+**Not exposed:** `gbrain delete`. The bridge is read + put only by design. If you need to remove a page, ask Tony to run it from his shell.
+
+**Timeouts:** 30s default per call, 120s cap. If a query times out, retry with `no_expand: true` for a faster, narrower search.
+
+## When to use `gbrain_*` vs raw `gbrain` CLI
+
+- **Use `gbrain_*` tools** for: agent-time retrieval, persisting daily insights, briefing context fetch, content recall, person/project lookup. Standard everyday operations.
+- **Drop to raw CLI (bash)** for: imports (`gbrain import`), embedding rebuilds (`gbrain embed --stale`, `--all`), schema migrations, `doctor`, `sync`, `sources`, `delete`, `dream`, `lint`, anything platform-level. These are not bridged on purpose.
 
 ## Core model
 
