@@ -115,7 +115,7 @@ Active teams: `realtor-team` (12-18 mo home buying, weekly Monday 8 AM).
 - Unsure? → launch new (clean context never hurts)
 - ALL cron dispatches
 
-Full decision flow: `.github/skills/agent-dispatch` and `.github/skills/agent-steering`.
+Full decision flow: `.github/skills/agent-steering`.
 
 ### Sub-Agent Governance
 Sub-agents load `data/constitution.md` for core principles, communication rules, autonomy levels, and multi-agent protocol. Reference it when launching agents.

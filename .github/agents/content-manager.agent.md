@@ -88,7 +88,7 @@ Proactively manage the content pipeline:
 
 ## Task: Issue Reconciliation (Recurring)
 
-**Use the `content-reconciliation` skill (`.{{EMPLOYER_PARENT}}/skills/content-reconciliation/SKILL.md`)** for the full reconciliation workflow — fuzzy matching, label updates, close logic, skip rules, and comment templates. Runs Mon + Thu mornings via cron.
+**Use the `content-issue-lifecycle` skill (`.github/skills/content-issue-lifecycle/SKILL.md`) → "Reconciliation (Sync Posts → Issues)" section** for the full reconciliation workflow — fuzzy matching, label updates, close logic, skip rules, and comment templates. Runs Mon + Thu mornings via cron.
 
 ## Task: Social Media Scheduling via Zernio
 

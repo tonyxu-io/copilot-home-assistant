@@ -318,7 +318,6 @@ Follow the `video-quality-review` skill (`.github/skills/video-quality-review/SK
 
 ### Step 6: Intro/Outro Concatenation (MANDATORY — never skip)
 Follow the `ffmpeg-video-editing` skill for concat procedure. Detect aspect ratio via `ffprobe`, select matching bumper assets from `C:\vidpipe\assets\`, run FFmpeg concat demuxer. Rules: Main videos (>60s) get intro+outro. Shorts (<60s) get outro only. Medium clips (60s-5min) get both. Verify output duration = intro + main + outro.
-4. Verify output plays correctly (ffprobe check duration = intro + main + outro)
 
 ### Step 7: Deliver
 1. Save all outputs to `data/content-editor-output/{timestamp}/`
@@ -388,9 +387,7 @@ Follow the `ffmpeg-video-editing` skill for concat procedure. Detect aspect rati
 
 ## Agent Steering & Dispatch
 
-Follow the `agent-steering` skill at `.github/skills/agent-steering/SKILL.md` for the full protocol. Key rule: use `write_agent` for follow-ups within the same run, but ALWAYS launch fresh for new production runs or cron dispatches.
-
-**For launch-vs-steer decisions**, also follow the `agent-dispatch` skill (`.github/skills/agent-dispatch/SKILL.md`) — the canonical decision flow for when to launch new agents via `task` tool vs steer existing idle agents via `write_agent`.
+Follow the `agent-steering` skill at `.github/skills/agent-steering/SKILL.md` for the full launch-vs-steer decision flow and protocol. Key rule: `write_agent` for follow-ups within the same `run_id`; ALWAYS launch fresh via `task` for new production runs or cron dispatches.
 
 ---
 
