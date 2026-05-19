@@ -113,7 +113,18 @@ def run_cmd(cmd: str, *, cwd: Path | None = None, timeout: int = 600) -> dict[st
     env["PATH"] = "/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:/home/tonyxu/.bun/bin:" + env.get("PATH", "")
     started = time.time()
     try:
-        proc = subprocess.run(["bash", "-lic", cmd], cwd=str(cwd) if cwd else None, text=True, capture_output=True, timeout=timeout, env=env)
+        # IMPORTANT: use `bash -lc`, NOT `bash -lic`.
+        # The `-i` (interactive) flag makes bash try to use a controlling tty —
+        # which, when this wrapper is invoked from a non-tty context (cron /
+        # agent / nested subprocess.run), causes bash to receive SIGTTIN or
+        # SIGTTOU as soon as anything in `~/.bashrc` touches the terminal,
+        # leaving the bash child STOPPED (state T) until the parent's wall-clock
+        # timeout fires. This was the smoking gun for the action_queue and
+        # labels hangs at 11:15 / 12:15 / 13:15 — wrapper sees the subprocess
+        # produce zero output and eventually hit step_timeout; `/proc/<pid>/status`
+        # shows `State: T (stopped)` and `wchan: do_signal_stop`, fd 255 → /dev/tty.
+        # `-l` alone still sources the login profile (PATH, brew, etc.).
+        proc = subprocess.run(["bash", "-lc", cmd], cwd=str(cwd) if cwd else None, text=True, capture_output=True, timeout=timeout, env=env)
     except subprocess.TimeoutExpired as exc:
         partial = redact(((exc.stdout or "") + ("\nSTDERR:\n" + (exc.stderr or "") if exc.stderr else ""))) if (exc.stdout or exc.stderr) else ""
         return {
@@ -227,6 +238,7 @@ def public_maintenance_summary(result: dict[str, Any], now: datetime) -> dict[st
         "timed_out_steps": result.get("timed_out_steps", []),
         "step_durations_s": result.get("step_durations_s", {}),
         "step_timeouts_s": result.get("step_timeouts_s", {}),
+        "step_tails": result.get("step_tails", {}),
         "labels": {
             "status": labels.get("status") if isinstance(labels, dict) else None,
             "created_labels": labels.get("created_labels", []) if isinstance(labels, dict) else [],
@@ -293,6 +305,7 @@ def main() -> int:
         "soft_deadline_s": SOFT_DEADLINE_S,
         "step_durations_s": {},
         "step_timeouts_s": {},
+        "step_tails": {},
         "deadline_hit": False,
     }
     log(f"start hour={now.hour} should_sync={should_sync} budget={SOFT_DEADLINE_S}s")
@@ -302,6 +315,12 @@ def main() -> int:
         if step.get("timed_out"):
             result["status"] = "error"
             result.setdefault("timed_out_steps", []).append(name)
+            # Forensic: persist the last KB of stderr from any timed-out step
+            # so the *next* hang has visible "exec>" trace evidence even after
+            # the subprocess is gone. Already redacted by run_cmd.
+            tail = step.get("tail") or ""
+            if tail:
+                result["step_tails"][name] = tail[-1500:]
 
     # Email-butler maintenance layer ---------------------------------------
     if deadline_hit():
