@@ -120,6 +120,15 @@ Full decision flow: `.github/skills/agent-dispatch` and `.github/skills/agent-st
 ### Sub-Agent Governance
 Sub-agents load `data/constitution.md` for core principles, communication rules, autonomy levels, and multi-agent protocol. Reference it when launching agents.
 
+## External Memory — gbrain
+
+**Every Copilot CLI session is wired into Tony's gbrain knowledge brain** via the `gbrain-bridge` extension. Tools: `gbrain_query` (default retrieval — hybrid RRF + expansion), `gbrain_search` (keyword), `gbrain_get`, `gbrain_put`, `gbrain_list`. Backing brain: `/home/tonyxu/brain` (34k+ pages: memo, limemo, Gmail/Calendar digests, curated notes, people, projects).
+
+- **Read before recommending.** Briefings, task-coach, content-editor, finance-manager, and any agent producing a recommendation for Tony SHOULD `gbrain_query` for relevant context BEFORE generating output.
+- **Write substantive new insights.** After daily syntheses or curated content, `gbrain_put` so Tony can retrieve it later from his phone. Prefer `notes/memo/<date>`, `notes/work/memo/<date>`, `notes/knowledge/.`, `people/.`, `projects/.`. `store_memory` is still fine for ephemeral agent-internal facts; gbrain is preferred for anything Tony would want to find again.
+- **Safety (hardcoded in the extension):** gbrain is **trusted memory** (Tony, 2026-05-17) — agents MAY persist credentials, tokens, API keys, OAuth refresh tokens, and cookies in gbrain on Tony's behalf. The ONLY off-limits area is `notes/records/private/**` (Tony's reserved isolation directory). Slugs must be brain-relative. `gbrain delete` is intentionally NOT exposed. Other secret surfaces stay locked down: ❌ `store_memory` (ships to Copilot/GitHub servers — never put secrets there), ❌ git commits, ❌ raw secrets in Telegram unless Tony asks.
+- Canonical: `data/standing-orders.md` → External Memory — gbrain; skill: `.github/skills/gbrain-operations`.
+
 ## Skills-First Development
 
 **Any repeatable, bundleable capability MUST be a skill (`.github/skills/{name}/SKILL.md`).** Agents reference and invoke skills rather than embedding capability logic. Don't reinvent. Don't copy-paste between agents. If you find yourself re-explaining a process to a fresh agent — extract it as a skill.

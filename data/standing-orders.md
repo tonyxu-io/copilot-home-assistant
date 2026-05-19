@@ -385,6 +385,53 @@ If any family member publicly represents a company, employer, or product, define
 - ❌ Sending a sales qualification email to someone who only asked for article resources
 - ❌ Letting paid-traffic leads sit without same-day contact when your automation policy allows immediate follow-up
 
+---
+
+## External Memory — gbrain (PLATFORM DIRECTIVE — 2026-05-18)
+
+**gbrain is now wired into every Copilot CLI session** via the `gbrain-bridge` extension (`.github/extensions/gbrain-bridge/`). gbrain is Tony's personal knowledge brain at `/home/tonyxu/brain` — 34k+ pages indexed: memo, limemo (work memo), source exports (Gmail/Calendar digests), curated notes, projects, people. The assistant is no longer knowledge-isolated per session.
+
+**Five tools exposed to all agents and crons:**
+
+| Tool | Use for |
+|---|---|
+| `gbrain_query` | Hybrid search (RRF + expansion). **Default retrieval.** |
+| `gbrain_search` | Keyword tsvector search for exact phrases / proper nouns |
+| `gbrain_get` | Read full markdown of a page by slug |
+| `gbrain_put` | Persist a new page (optional embed) |
+| `gbrain_list` | Diagnostics — list pages by type/tag |
+
+**Default policy — read before recommending:**
+- Briefings, task-coach, content-editor, finance-manager, parenting-coach, and any agent producing a recommendation for Tony SHOULD `gbrain_query` for relevant context **before** producing output. Pull recent memo/limemo/digests/events for the topic at hand.
+- For email/topic triage, query gbrain on the sender, subject keywords, or company name to surface prior context before classifying.
+
+**Default policy — write substantive new insights:**
+- After producing daily syntheses, durable insights, or curated external content, agents SHOULD `gbrain_put` so Tony can find it later from his phone.
+- Prefer brain-curated paths: `notes/memo/<date>`, `notes/work/memo/<date>` (limemo), `notes/knowledge/.`, `people/.`, `projects/.`. See the `gbrain-operations` skill for routing.
+- `store_memory` (Copilot built-in) is still allowed for ephemeral cross-session facts that are agent-internal. **gbrain is preferred for anything Tony would want to retrieve later.**
+
+**Safety rails (also hardcoded in the extension):**
+- `gbrain` is **trusted memory** (Tony, 2026-05-17). Agents MAY store credentials, tokens, API keys, cookies, OAuth refresh tokens, and other secrets in gbrain when Tony asks them to — the brain lives locally and Tony explicitly wants these retrievable from his phone via gbrain.
+- The ONE remaining off-limits area is `notes/records/private/**` — Tony's reserved isolation directory. The extension refuses writes there.
+- Slugs must be brain-relative (no leading `/`, no `..`). 512KB max per page.
+- `gbrain delete` is intentionally NOT exposed. The bridge is read + put only.
+- 30s default per-call timeout, 120s cap.
+
+**Other secret/credential surfaces are NOT relaxed:**
+- ❌ `store_memory` (Copilot built-in) — still **forbidden** for secrets. That call ships content to Copilot/GitHub servers; it is a remote memory layer, not local-and-trusted like gbrain.
+- ❌ git commits — still never commit credentials. The brain repo is separate from `copilot-home-assistant`; secrets live only in gbrain pages, not in checked-in code.
+- ❌ Telegram messages — don't paste raw secrets into chat unless Tony explicitly asks; reference the gbrain slug instead.
+
+**Recommended slug conventions for credential pages** (so agents can find them later via `gbrain_query`):
+- `notes/secrets/<service>` — e.g. `notes/secrets/stripe-test`, `notes/secrets/aws-prod`
+- `credentials/<service>` — top-level, for things Tony wants immediate `gbrain query "credentials"` recall on
+- `notes/work/secrets/<service>` — work-scoped credentials
+Use clear titles and include `service`, `account`, `created`, and rotation/expiry hints in frontmatter.
+
+**Canonical skill:** `.github/skills/gbrain-operations/SKILL.md` (now includes `gbrain_*` tool usage as the preferred surface).
+
+---
+
 ## Skills-First Development (PLATFORM DIRECTIVE — from direct feedback)
 
 **Lean heavily on skills.** Any repeatable, bundleable capability MUST be extracted into a skill (`.github/skills/`). Agents should invoke skills rather than embedding capability logic inline. When building or improving anything, always ask: "Should this be a skill?"
